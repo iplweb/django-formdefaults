@@ -126,6 +126,18 @@ Either way, snapshot is created on first render.
 `/admin/formdefaults/formrepresentation/` — pick a form by label, then for
 each field add or edit a `FormFieldDefaultValue` row with `User` empty.
 
+The `FormRepresentation` row also has `html_before` and `html_after` text
+fields, useful for surfacing in-form legends, contextual help, or a quick
+note. They land in the form's `initial` dict under
+`formdefaults_pre_html` and `formdefaults_post_html`. Render them in your
+template however you like:
+
+```django
+{{ form.initial.formdefaults_pre_html|safe }}
+{{ form }}
+{{ form.initial.formdefaults_post_html|safe }}
+```
+
 ### Per-user (popup next to the form)
 
 In your template:
