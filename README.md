@@ -160,8 +160,9 @@ In your template:
 > Place `{% formdefaults_button form %}` **outside** the `<form>` element — the modal injects its own `<form>` for saving overrides, and HTML5 forbids nesting forms.
 
 The button only renders for authenticated users. Clicking it opens a modal
-with one input per form field, pre-filled with the user's existing overrides.
-Empty input clears the override.
+with one input per form field, pre-filled with the currently-effective
+default value (your override if you have one, otherwise the system-wide
+value).
 
 Each field in the popup has a small checkbox to its left. The checkbox
 controls whether your edit becomes an override:
