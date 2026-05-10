@@ -1,0 +1,30 @@
+.fd-modal-host[hidden] { display: none; }
+.fd-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.fd-modal {
+  background: #fff;
+  padding: 1.5em;
+  border-radius: 6px;
+  min-width: 320px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+.fd-modal-close {
+  position: absolute; top: 0.25em; right: 0.5em;
+  background: none; border: none; font-size: 1.6em; cursor: pointer; color: #555;
+}
+.fd-modal h3 { margin: 0 0 0.75em 0; font-size: 1.15em; }
+.fd-field { margin-bottom: 0.75em; }
+.fd-field label { display: block; font-weight: 600; margin-bottom: 0.25em; }
+.fd-field input, .fd-field select, .fd-field textarea { width: 100%; box-sizing: border-box; }
+.fd-errors { color: #c00; font-size: 0.9em; margin-top: 0.25em; }
+.fd-saved { color: #060; margin: 0 0 0.75em 0; }
+.fd-submit { padding: 0.4em 1em; }
+.fd-edit-btn { font-size: 0.9em; cursor: pointer; }
