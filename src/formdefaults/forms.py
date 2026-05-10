@@ -48,7 +48,7 @@ class _UserDefaultsForm(forms.Form):
                 parent=self._form_repr,
                 field=db_field,
                 user=self._user,
-                defaults={"value": _serialize(value)},
+                defaults={"value": _serialize(value), "is_auto_snapshot": False},
             )
 
 
