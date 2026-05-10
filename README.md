@@ -137,12 +137,15 @@ In your template:
   {% csrf_token %}
   {{ form }}
   <button type="submit">Submit</button>
-  {% formdefaults_button form %}
 </form>
+
+{% formdefaults_button form %}
 
 <script src="{% static 'formdefaults/modal.js' %}" defer></script>
 <link rel="stylesheet" href="{% static 'formdefaults/modal.css' %}">
 ```
+
+> Place `{% formdefaults_button form %}` **outside** the `<form>` element — the modal injects its own `<form>` for saving overrides, and HTML5 forbids nesting forms.
 
 The button only renders for authenticated users. Clicking it opens a modal
 with one input per form field, pre-filled with the user's existing overrides.

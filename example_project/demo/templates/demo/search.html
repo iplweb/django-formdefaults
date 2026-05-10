@@ -10,9 +10,11 @@
     {{ form.as_p }}
     <div class="actions">
       <button type="submit">Szukaj</button>
-      {% formdefaults_button form %}
     </div>
   </form>
+  <div class="actions">
+    {% formdefaults_button form %}
+  </div>
 </div>
 {% if submitted %}<pre>{{ submitted }}</pre>{% endif %}
 {% endblock %}
