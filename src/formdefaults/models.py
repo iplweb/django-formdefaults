@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, Q
 
 from formdefaults.core import get_form_defaults
 from formdefaults.util import full_name, get_python_class_by_name
@@ -165,6 +165,11 @@ class FormFieldDefaultValue(models.Model):
             models.UniqueConstraint(
                 fields=["field", "user"],
                 name="fd_unique_field_user",
+            ),
+            models.UniqueConstraint(
+                fields=["field"],
+                condition=Q(user__isnull=True),
+                name="fd_unique_field_system",
             ),
         ]
         indexes = [
