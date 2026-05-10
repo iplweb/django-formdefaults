@@ -1,4 +1,5 @@
+{% load i18n %}
 {% if show %}
-<button type="button" class="fd-edit-btn" data-fd-url="{{ url }}">⚙ Moje wartości domyślne</button>
+<button type="button" class="fd-edit-btn" data-fd-url="{{ url }}">⚙ {% trans "My defaults" %}</button>
 <div class="fd-modal-host" data-fd-for="{{ form_full_name }}" hidden></div>
 {% endif %}

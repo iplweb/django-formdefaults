@@ -21,6 +21,11 @@
   background: none; border: none; font-size: 1.6em; cursor: pointer; color: #555;
 }
 .fd-modal h3 { margin: 0 0 0.75em 0; font-size: 1.15em; }
+.fd-help {
+  margin: 0 0 0.75em 0;
+  font-size: 0.85em;
+  color: #666;
+}
 .fd-field { margin-bottom: 0.75em; }
 .fd-field input, .fd-field select, .fd-field textarea { width: 100%; box-sizing: border-box; }
 .fd-errors { color: #c00; font-size: 0.9em; margin-top: 0.25em; }
