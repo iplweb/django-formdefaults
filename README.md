@@ -163,6 +163,17 @@ The button only renders for authenticated users. Clicking it opens a modal
 with one input per form field, pre-filled with the user's existing overrides.
 Empty input clears the override.
 
+Each field in the popup has a small checkbox to its left. The checkbox
+controls whether your edit becomes an override:
+
+- Unchecked → leave the field alone; the system-wide default applies to
+  you.
+- Checked → save the value next to it as your personal override.
+
+The checkbox auto-checks when you actually edit the field, so the common
+flow is "type your new value, save". Uncheck if you want to delete a
+previously-saved override.
+
 ## Try it locally
 
 ```bash
