@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-formdefaults"
+version = "0.1.0"
+description = "Per-user, database-backed default values for Django forms — lets users (and admins) save the values they typed last time."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Michał Pasternak", email = "michal.dtz@gmail.com" },
+]
+keywords = [
+    "django",
+    "forms",
+    "defaults",
+    "initial-values",
+    "per-user",
+    "form-defaults",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "Django>=4.2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7",
+    "pytest-django>=4.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/iplweb/django-formdefaults"
+Repository = "https://github.com/iplweb/django-formdefaults"
+Issues = "https://github.com/iplweb/django-formdefaults/issues"
+Changelog = "https://github.com/iplweb/django-formdefaults/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/formdefaults",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/formdefaults"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "C4",   # flake8-comprehensions
+]
+ignore = [
+    "E501",  # line too long — formatter handles it
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["B", "ARG"]
+"src/formdefaults/migrations/*.py" = ["E", "W", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+pythonpath = ["."]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
