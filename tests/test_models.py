@@ -141,3 +141,22 @@ def test_get_or_create_for_instance_seeds_label_with_full_name():
     fr = FormRepresentation.objects.get_or_create_for_instance(FormForTests())
     assert fr.label == _fn(FormForTests())
     assert fr.label != ""
+
+
+@pytest.mark.django_db
+def test_FormFieldDefaultValue_system_and_user_coexist(test_form_repr, test_form, normal_django_user):
+    """The same field can have one system-wide row (user=None) AND one
+    per-user row simultaneously — that is the whole point of the override
+    layer."""
+    from formdefaults.core import update_form_db_repr
+    from formdefaults.models import FormFieldDefaultValue
+    update_form_db_repr(test_form, test_form_repr)
+    field = test_form_repr.fields_set.first()
+    FormFieldDefaultValue.objects.filter(field=field).delete()
+
+    FormFieldDefaultValue.objects.create(parent=test_form_repr, field=field, user=None, value=1)
+    FormFieldDefaultValue.objects.create(
+        parent=test_form_repr, field=field, user=normal_django_user, value=2
+    )
+
+    assert FormFieldDefaultValue.objects.filter(field=field).count() == 2
