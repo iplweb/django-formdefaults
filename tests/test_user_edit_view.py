@@ -182,3 +182,29 @@ def test_template_tag_renders_nothing_for_anonymous():
     )
     rendered = template.render(Context({"request": request, "form": DemoForm()}))
     assert "fd-edit-btn" not in rendered
+
+
+import datetime as _dt
+
+
+class _DateForm(forms.Form):
+    d = forms.DateField(label="Date", initial=_dt.date(2026, 5, 9))
+
+
+@pytest.mark.django_db
+def test_build_form_save_serialises_date(db):
+    """Verify _serialize handles DateField cleaned values (date → ISO string)."""
+    from formdefaults.core import update_form_db_repr
+
+    instance = _DateForm()
+    fr, _ = FormRepresentation.objects.get_or_create(full_name=full_name(instance))
+    update_form_db_repr(instance, fr)
+
+    u = get_user_model().objects.create_user(username="dt", password="p")
+    f = build_user_defaults_form(fr, user=u, data={"d": "2027-01-15"})
+    assert f.is_valid(), f.errors
+    f.save()
+
+    field_d = fr.fields_set.get(name="d")
+    row = FormFieldDefaultValue.objects.get(field=field_d, user=u)
+    assert row.value == "2027-01-15"
