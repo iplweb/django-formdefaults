@@ -15,7 +15,7 @@ SNAPSHOT_TTL_SECONDS = 60.0
 
 
 def _do_update(form_instance, form_repr, user=None):
-    from formdefaults.models import FormFieldDefaultValue, FormFieldRepresentation
+    from formdefaults.models import FormFieldRepresentation
 
     form_fields = form_instance.fields
     form_fields_names = list(form_fields.keys())
@@ -59,21 +59,27 @@ def _do_update(form_instance, form_repr, user=None):
                 db_field.delete()
             continue
 
-        if created:
-            FormFieldDefaultValue.objects.get_or_create(
-                parent=form_repr,
-                field=db_field,
-                user=None,
-                defaults={"value": form_field_value},
-            )
-
+        _upsert_auto_value(form_repr, db_field, user=None, code_value=form_field_value)
         if user is not None:
-            FormFieldDefaultValue.objects.get_or_create(
-                parent=form_repr,
-                field=db_field,
-                user=user,
-                defaults={"value": form_field_value},
-            )
+            _upsert_auto_value(form_repr, db_field, user=user, code_value=form_field_value)
+
+
+def _upsert_auto_value(form_repr, db_field, *, user, code_value):
+    """Create the (field, user) value row if missing, or refresh it when
+    its is_auto_snapshot flag is still True and value drifted from code."""
+    from formdefaults.models import FormFieldDefaultValue
+
+    row, created = FormFieldDefaultValue.objects.get_or_create(
+        parent=form_repr,
+        field=db_field,
+        user=user,
+        defaults={"value": code_value, "is_auto_snapshot": True},
+    )
+    if created:
+        return
+    if row.is_auto_snapshot and row.value != code_value:
+        row.value = code_value
+        row.save(update_fields=["value"])
 
 
 def update_form_db_repr(form_instance, form_repr, user=None):
