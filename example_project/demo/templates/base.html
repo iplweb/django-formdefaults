@@ -1,20 +1,23 @@
-{% load static %}
+{% load i18n static %}
 <!doctype html>
-<html lang="pl">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
-  <title>{% block title %}django-formdefaults demo{% endblock %}</title>
+  <title>{% block title %}{% trans "django-formdefaults demo" %}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'formdefaults/modal.css' %}">
   <style>
     body { font-family: sans-serif; max-width: 720px; margin: 2em auto; padding: 0 1em; }
+    nav { display: flex; justify-content: space-between; align-items: center; }
     nav a { margin-right: 1em; }
+    .lang-switch form { display: inline; margin: 0; }
+    .lang-switch button {
+      background: none; border: none; color: #06c; cursor: pointer;
+      padding: 0; margin: 0 0.25em; font: inherit; text-decoration: underline;
+    }
     .form-card { border: 1px solid #ddd; padding: 1em; border-radius: 6px; }
     .form-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1em;
-      margin-bottom: 0.5em;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 1em; margin-bottom: 0.5em;
     }
     .form-card-header h2 { margin: 0; font-size: 1.1em; }
     .form-card .actions { display: flex; gap: 1em; align-items: center; margin-top: 0.5em; }
@@ -23,10 +26,22 @@
 </head>
 <body>
   <nav>
-    <a href="{% url 'demo:report' %}">Raport</a>
-    <a href="{% url 'demo:settings' %}">Ustawienia</a>
-    <a href="{% url 'demo:search' %}">Szukaj</a>
-    <a href="/admin/">Admin</a>
+    <span>
+      <a href="{% url 'demo:report' %}">{% trans "Report" %}</a>
+      <a href="{% url 'demo:settings' %}">{% trans "Settings" %}</a>
+      <a href="{% url 'demo:search' %}">{% trans "Search" %}</a>
+      <a href="/admin/">{% trans "Admin" %}</a>
+    </span>
+    <span class="lang-switch">
+      {% get_current_language as LANGUAGE_CODE %}
+      <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <button type="submit" name="language" value="en"{% if LANGUAGE_CODE == 'en' %} disabled{% endif %}>EN</button>
+        |
+        <button type="submit" name="language" value="pl"{% if LANGUAGE_CODE == 'pl' %} disabled{% endif %}>PL</button>
+      </form>
+    </span>
   </nav>
   <hr>
   {% block content %}{% endblock %}

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load formdefaults %}
-{% block title %}Ustawienia{% endblock %}
+{% load formdefaults i18n %}
+{% block title %}{% trans "User settings" %}{% endblock %}
 {% block content %}
-<h1>Ustawienia użytkownika</h1>
-<p><em>Rejestracja: setting <code>FORMDEFAULTS_FORMS</code> w <code>example_project/settings.py</code>.</em></p>
+<h1>{% trans "User settings" %}</h1>
+<p><em>{% blocktrans %}Registration: <code>FORMDEFAULTS_FORMS</code> setting in <code>example_project/settings.py</code>.{% endblocktrans %}</em></p>
 <div class="form-card">
   <div class="form-card-header">
-    <h2>Formularz</h2>
+    <h2>{% trans "Form" %}</h2>
     {% formdefaults_button form %}
   </div>
   {% if form.initial.formdefaults_pre_html %}
@@ -16,7 +16,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <div class="actions">
-      <button type="submit">Zapisz</button>
+      <button type="submit">{% trans "Save" %}</button>
     </div>
   </form>
   {% if form.initial.formdefaults_post_html %}

@@ -59,7 +59,7 @@ def test_post_migrate_pre_registers_decorator_form(example_settings):
     snapshot_registered_forms(sender=_S)
     fr = FormRepresentation.objects.get(full_name="demo.forms.MonthlyReportForm")
     assert fr.pre_registered is True
-    assert fr.label == "Raport miesięczny"
+    assert fr.label == "Monthly report"
     assert fr.fields_set.count() == 3
 
 
@@ -74,4 +74,4 @@ def test_post_migrate_pre_registers_setting_form(example_settings):
     snapshot_registered_forms(sender=_S)
     fr = FormRepresentation.objects.get(full_name="demo.forms.UserSettingsForm")
     assert fr.pre_registered is True
-    assert fr.label == "Ustawienia użytkownika"
+    assert fr.label == "User settings"

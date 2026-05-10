@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load formdefaults %}
-{% block title %}Szukaj{% endblock %}
+{% load formdefaults i18n %}
+{% block title %}{% trans "Search" %}{% endblock %}
 {% block content %}
-<h1>Szukaj</h1>
-<p><em>Rejestracja: <strong>brak</strong> — snapshot powstaje przy pierwszym renderze.</em></p>
+<h1>{% trans "Search" %}</h1>
+<p><em>{% blocktrans %}Registration: <strong>none</strong> — snapshot happens on first render.{% endblocktrans %}</em></p>
 <div class="form-card">
   <div class="form-card-header">
-    <h2>Formularz</h2>
+    <h2>{% trans "Form" %}</h2>
     {% formdefaults_button form %}
   </div>
   {% if form.initial.formdefaults_pre_html %}
@@ -16,7 +16,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <div class="actions">
-      <button type="submit">Szukaj</button>
+      <button type="submit">{% trans "Search" %}</button>
     </div>
   </form>
   {% if form.initial.formdefaults_post_html %}

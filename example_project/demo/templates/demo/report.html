@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load formdefaults %}
-{% block title %}Raport miesięczny{% endblock %}
+{% load formdefaults i18n %}
+{% block title %}{% trans "Monthly report" %}{% endblock %}
 {% block content %}
-<h1>Raport miesięczny</h1>
-<p><em>Rejestracja: dekorator <code>@register_form</code> w <code>demo/forms.py</code>.</em></p>
+<h1>{% trans "Monthly report" %}</h1>
+<p><em>{% blocktrans %}Registration: <code>@register_form</code> decorator in <code>demo/forms.py</code>.{% endblocktrans %}</em></p>
 <div class="form-card">
   <div class="form-card-header">
-    <h2>Formularz</h2>
+    <h2>{% trans "Form" %}</h2>
     {% formdefaults_button form %}
   </div>
   {% if form.initial.formdefaults_pre_html %}
@@ -16,7 +16,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <div class="actions">
-      <button type="submit">Generuj</button>
+      <button type="submit">{% trans "Generate" %}</button>
     </div>
   </form>
   {% if form.initial.formdefaults_post_html %}

@@ -1,50 +1,50 @@
-"""Three demo forms, each illustrating a different registration path.
-
-1. MonthlyReportForm — decorator path (@register_form).
-2. UserSettingsForm  — setting path (FORMDEFAULTS_FORMS in settings.py).
-3. SearchForm        — ad-hoc path (no registration; snapshot on first render).
-"""
+"""Three demo forms, each illustrating a different registration path."""
 
 import datetime
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from formdefaults import register_form
 
 
-@register_form(label="Raport miesięczny")
+@register_form(label=_("Monthly report"))
 class MonthlyReportForm(forms.Form):
-    year = forms.IntegerField(label="Rok", initial=datetime.date.today().year)
+    year = forms.IntegerField(label=_("Year"), initial=datetime.date.today().year)
     month = forms.ChoiceField(
-        label="Miesiąc",
+        label=_("Month"),
         choices=[(i, f"{i:02d}") for i in range(1, 13)],
         initial=datetime.date.today().month,
     )
     include_inactive = forms.BooleanField(
-        label="Uwzględnij nieaktywnych", required=False, initial=False,
+        label=_("Include inactive"), required=False, initial=False,
     )
 
 
 class UserSettingsForm(forms.Form):
-    formdefaults_label = "Ustawienia użytkownika"
+    formdefaults_label = _("User settings")
 
     notify_email = forms.BooleanField(
-        label="Powiadomienia e-mail", required=False, initial=True,
+        label=_("Email notifications"), required=False, initial=True,
     )
     items_per_page = forms.IntegerField(
-        label="Pozycji na stronę", initial=25, min_value=5, max_value=200,
+        label=_("Items per page"), initial=25, min_value=5, max_value=200,
     )
     theme = forms.ChoiceField(
-        label="Motyw",
-        choices=[("light", "Jasny"), ("dark", "Ciemny"), ("system", "Systemowy")],
+        label=_("Theme"),
+        choices=[
+            ("light", _("Light")),
+            ("dark", _("Dark")),
+            ("system", _("System")),
+        ],
         initial="system",
     )
 
 
 class SearchForm(forms.Form):
-    q = forms.CharField(label="Szukaj", required=False, initial="")
+    q = forms.CharField(label=_("Search"), required=False, initial="")
     sort_by = forms.ChoiceField(
-        label="Sortuj wg",
-        choices=[("name", "Nazwa"), ("date", "Data")],
+        label=_("Sort by"),
+        choices=[("name", _("Name")), ("date", _("Date"))],
         initial="name",
     )
