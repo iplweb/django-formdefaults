@@ -152,3 +152,33 @@ def test_view_user_data_in_post_is_ignored(demo_form_repr, user):
     field_n = demo_form_repr.fields_set.get(name="n")
     assert not FormFieldDefaultValue.objects.filter(field=field_n, user=other).exists()
     assert FormFieldDefaultValue.objects.filter(field=field_n, user=user).exists()
+
+
+from django.template import Context, Template
+from django.test import RequestFactory
+
+
+@pytest.mark.django_db
+def test_template_tag_renders_button_for_authed_user(demo_form_repr, user):
+    rf = RequestFactory()
+    request = rf.get("/")
+    request.user = user
+    template = Template(
+        "{% load formdefaults %}{% formdefaults_button form %}"
+    )
+    rendered = template.render(Context({"request": request, "form": DemoForm()}))
+    assert "fd-edit-btn" in rendered
+    assert demo_form_repr.full_name in rendered
+
+
+@pytest.mark.django_db
+def test_template_tag_renders_nothing_for_anonymous():
+    from django.contrib.auth.models import AnonymousUser
+    rf = RequestFactory()
+    request = rf.get("/")
+    request.user = AnonymousUser()
+    template = Template(
+        "{% load formdefaults %}{% formdefaults_button form %}"
+    )
+    rendered = template.render(Context({"request": request, "form": DemoForm()}))
+    assert "fd-edit-btn" not in rendered
