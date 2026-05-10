@@ -123,7 +123,6 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
     values = {
         qs["field__name"]: qs["value"]
         for qs in form_repr.values_set.filter(user=None)
-        .select_related("field__name")
         .values("field__name", "value")
     }
 
@@ -131,7 +130,6 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
         user_values = {
             qs["field__name"]: qs["value"]
             for qs in form_repr.values_set.filter(user=user)
-            .select_related("field__name")
             .values("field__name", "value")
         }
         values.update(user_values)
