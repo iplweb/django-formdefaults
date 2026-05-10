@@ -1,7 +1,10 @@
-{% for field in form %}
+{% for override_field, value_field in form.field_pairs %}
 <div class="fd-field">
-  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-  {{ field }}
-  {% if field.errors %}<div class="fd-errors">{{ field.errors }}</div>{% endif %}
+  <span class="fd-override-cell">{{ override_field }}</span>
+  <label class="fd-field-body" for="{{ value_field.id_for_label }}">
+    <span class="fd-field-label">{{ value_field.label }}</span>
+    {{ value_field }}
+    {% if value_field.errors %}<div class="fd-errors">{{ value_field.errors }}</div>{% endif %}
+  </label>
 </div>
 {% endfor %}
