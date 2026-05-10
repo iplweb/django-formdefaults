@@ -9,6 +9,7 @@ from formdefaults.util import full_name
 
 logger = logging.getLogger(__name__)
 
+# Per-process freshness cache — invalidated only on process restart (deploy).
 _LAST_SNAPSHOT: dict[str, float] = {}
 SNAPSHOT_TTL_SECONDS = 60.0
 
