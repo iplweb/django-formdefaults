@@ -156,3 +156,23 @@ def test_FormFieldDefaultValue_system_and_user_coexist(test_form_repr, test_form
     )
 
     assert FormFieldDefaultValue.objects.filter(field=field).count() == 2
+
+
+@pytest.mark.django_db
+def test_resolve_initial_finds_form_class(test_form_repr, test_form):
+    """Helper used by 0007 data migration finds the form's current initial."""
+    from formdefaults._autosnap_backfill import resolve_initial
+    from formdefaults.core import update_form_db_repr
+
+    update_form_db_repr(test_form, test_form_repr)
+    field = test_form_repr.fields_set.first()
+
+    found, initial = resolve_initial(test_form_repr.full_name, field.name)
+    assert found is True
+    assert initial == 50
+
+
+def test_resolve_initial_handles_missing_class():
+    from formdefaults._autosnap_backfill import resolve_initial
+    found, initial = resolve_initial("totally.missing.Form", "x")
+    assert found is False

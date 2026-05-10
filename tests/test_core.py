@@ -124,3 +124,43 @@ def test_update_form_db_repr_swallows_integrity_error(test_form, test_form_repr)
     ):
         # Should not raise.
         core.update_form_db_repr(test_form, test_form_repr)
+
+
+@pytest.mark.django_db
+def test_update_refreshes_auto_snapshot_value(test_form, test_form_repr):
+    """When code-level Form.initial drifts and DB row is is_auto_snapshot=True,
+    snapshot pulls the new value into the DB."""
+    from formdefaults.models import FormFieldDefaultValue
+
+    core.update_form_db_repr(test_form, test_form_repr)
+    row = FormFieldDefaultValue.objects.get(field__name="fld", user=None)
+    assert row.is_auto_snapshot is True
+    assert row.value == 123
+
+    test_form.fields["fld"].initial = 999
+    core._LAST_SNAPSHOT.clear()
+    core.update_form_db_repr(test_form, test_form_repr)
+
+    row.refresh_from_db()
+    assert row.value == 999
+    assert row.is_auto_snapshot is True
+
+
+@pytest.mark.django_db
+def test_update_does_not_touch_sticky_value(test_form, test_form_repr):
+    """A row with is_auto_snapshot=False is sticky — code drift doesn't touch it."""
+    from formdefaults.models import FormFieldDefaultValue
+
+    core.update_form_db_repr(test_form, test_form_repr)
+    row = FormFieldDefaultValue.objects.get(field__name="fld", user=None)
+    row.value = 42
+    row.is_auto_snapshot = False
+    row.save()
+
+    test_form.fields["fld"].initial = 999
+    core._LAST_SNAPSHOT.clear()
+    core.update_form_db_repr(test_form, test_form_repr)
+
+    row.refresh_from_db()
+    assert row.value == 42
+    assert row.is_auto_snapshot is False

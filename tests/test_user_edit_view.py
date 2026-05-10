@@ -208,3 +208,16 @@ def test_build_form_save_serialises_date(db):
     field_d = fr.fields_set.get(name="d")
     row = FormFieldDefaultValue.objects.get(field=field_d, user=u)
     assert row.value == "2027-01-15"
+
+
+@pytest.mark.django_db
+def test_popup_save_clears_auto_snapshot(demo_form_repr, user):
+    """After saving via the popup, is_auto_snapshot becomes False so the
+    value is sticky against future code changes."""
+    f = build_user_defaults_form(demo_form_repr, user=user, data={"n": "55", "txt": ""})
+    assert f.is_valid()
+    f.save()
+
+    field_n = demo_form_repr.fields_set.get(name="n")
+    row = FormFieldDefaultValue.objects.get(field=field_n, user=user)
+    assert row.is_auto_snapshot is False
