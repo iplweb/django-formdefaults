@@ -54,3 +54,13 @@ class FormRepresentationAdmin(admin.ModelAdmin):
     inlines = [FormFieldDefaultValueInline]
     readonly_fields = ["full_name", "pre_registered"]
     fields = ["label", "full_name", "pre_registered", "html_before", "html_after"]
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, FormFieldDefaultValue):
+                instance.is_auto_snapshot = False
+            instance.save()
+        for obj in formset.deleted_objects:
+            obj.delete()
+        formset.save_m2m()
