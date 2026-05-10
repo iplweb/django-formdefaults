@@ -161,3 +161,12 @@ class FormFieldDefaultValue(models.Model):
         verbose_name = "Wartość domyslna dla pola formularza"
         verbose_name_plural = "Wartości domyślne dla pól formularzy"
         ordering = ("user", "field__order")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["field", "user"],
+                name="fd_unique_field_user",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["parent", "user"], name="fd_parent_user_idx"),
+        ]

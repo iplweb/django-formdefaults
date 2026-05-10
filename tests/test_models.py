@@ -102,3 +102,20 @@ def test_FormFieldDefaultValue_default_value_wrong(
 def test_FormRepresentation_pre_registered_default_false():
     fr = FormRepresentation.objects.create(full_name="x.Y", label="Y")
     assert fr.pre_registered is False
+
+
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError
+
+@pytest.mark.django_db
+def test_FormFieldDefaultValue_unique_field_user(test_form_repr, test_form):
+    from formdefaults.core import update_form_db_repr
+    from formdefaults.models import FormFieldDefaultValue
+    User = get_user_model()
+    user = User.objects.create(username="u1")
+    update_form_db_repr(test_form, test_form_repr)
+    field = test_form_repr.fields_set.first()
+    FormFieldDefaultValue.objects.filter(field=field, user=user).delete()
+    FormFieldDefaultValue.objects.create(parent=test_form_repr, field=field, user=user, value=1)
+    with pytest.raises(IntegrityError):
+        FormFieldDefaultValue.objects.create(parent=test_form_repr, field=field, user=user, value=2)
