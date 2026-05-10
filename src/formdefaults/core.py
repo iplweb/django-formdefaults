@@ -1,65 +1,70 @@
 import json
+import logging
+import time
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 
 from formdefaults.util import full_name
 
+logger = logging.getLogger(__name__)
 
-def update_form_db_repr(form_instance, form_repr, user=None):
+_LAST_SNAPSHOT: dict[str, float] = {}
+SNAPSHOT_TTL_SECONDS = 60.0
+
+
+def __getattr__(name):
+    """Module-level lazy access to ``formdefaults.models`` symbols.
+
+    ``models.py`` imports from this module, so we cannot import models at the
+    top level (circular). Exposing the model classes through ``__getattr__``
+    lets test code patch e.g. ``formdefaults.core.FormFieldRepresentation``
+    without forcing an eager import at module load.
     """
-    Aktualizuje reprezentację formularza w bazie danych:
+    if name in ("FormFieldRepresentation", "FormFieldDefaultValue", "FormRepresentation"):
+        from formdefaults import models as _models
 
-    1) usuwa wszystkie pola które są w bazie a których nie ma w formularzu
-    2) tworzy pola które są w formularzu wraz z domyślnymi wartościami
+        return getattr(_models, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-    :type form_repr: formdefaults.models.FormRepresentation
-    :type form_instance: django.forms.Form
-    """
+
+def _do_update(form_instance, form_repr, user=None):
+    from formdefaults.models import FormFieldDefaultValue, FormFieldRepresentation
 
     form_fields = form_instance.fields
-    form_fields_names = form_fields.keys()
+    form_fields_names = list(form_fields.keys())
 
-    db_fields = form_repr.fields_set.all()
+    # Delete fields that are no longer in the form
+    form_repr.fields_set.filter(~Q(name__in=form_fields_names)).delete()
 
-    # Usuwanie pól, których nie ma w formularzu:
-    db_fields.filter(~Q(name__in=form_fields_names)).delete()
+    db_fields = {f.name: f for f in form_repr.fields_set.all()}
 
-    db_fields_dict = {db_field.name: db_field for db_field in db_fields}
-
-    # Przeleć listę pól, w razie potrzeby aktualizując typ lub etykietę
     for no, field_name in enumerate(form_fields_names):
         form_field = form_fields[field_name]
+        new_klass = full_name(form_field)
+        new_label = form_field.label or field_name.replace("_", " ").capitalize()
 
-        db_field = db_fields_dict.get(field_name)
+        db_field, created = FormFieldRepresentation.objects.get_or_create(
+            parent=form_repr,
+            name=field_name,
+            defaults={"klass": new_klass, "label": new_label, "order": no},
+        )
 
-        created = False
-        if db_field is None:
-            created = True
-            db_field = db_fields.create(
-                parent=form_repr,
-                name=field_name,
-                klass=full_name(form_field),
-                label=form_field.label or field_name.replace("_", " ").capitalize(),
-                order=no,
-            )
+        update_fields = []
+        if db_field.label != new_label:
+            db_field.label = new_label
+            update_fields.append("label")
+        if db_field.klass != new_klass:
+            db_field.klass = new_klass
+            update_fields.append("klass")
+        if db_field.order != no:
+            db_field.order = no
+            update_fields.append("order")
+        if update_fields:
+            db_field.save(update_fields=update_fields)
 
-        updated = False
-        if db_field.label != form_field.label:
-            db_field.label = form_field.label
-            updated = True
-
-        if full_name(form_field) != db_field.klass:
-            db_field.klass = full_name(form_field)
-            updated = True
-
-        if updated:
-            db_field.save()
-
-        # Sprawdź, czy wartość domyślna pola może być zapisana w bazie, tzn. czy
-        # poddaje się 'testowi' zakodowania jej w formacie JSON. Na tym etapie jeżeli
-        # wartość domyślna jest liczona np za pomocą funkcji, to system przejdzie
-        # do kolejnego pola, bez tworzenia wartości domyślnej w bazie danych.
+        # Try to record the form's initial as the system-wide default value.
+        # Lambda / non-JSON-serialisable initials are skipped silently.
         form_field_value = form_field.initial
         try:
             json.dumps(form_field_value)
@@ -69,22 +74,47 @@ def update_form_db_repr(form_instance, form_repr, user=None):
             continue
 
         if created:
-            # Reprezentację pola w bazie danych własnie utworzono, więc z tej okazji
-            # zapisz do bazy danych wartość domyślną tego pola w momencie tworzenia go:
-            form_repr.values_set.create(
-                field=db_field, value=form_field_value, user=user
+            FormFieldDefaultValue.objects.get_or_create(
+                parent=form_repr,
+                field=db_field,
+                user=None,
+                defaults={"value": form_field_value},
             )
 
-        # Jeżeli jest podany użytkownik to sprawdź, czy dla niego jest wpis w bazie danych;
-        # Jeżeli tego wpisu nie ma to utwórz go z wartością domyślną
         if user is not None:
-            user_value, created = form_repr.values_set.get_or_create(
-                field=db_field, user=user
+            FormFieldDefaultValue.objects.get_or_create(
+                parent=form_repr,
+                field=db_field,
+                user=user,
+                defaults={"value": form_field_value},
             )
 
-            if created:
-                user_value.value = form_field_value
-                user_value.save()
+
+def update_form_db_repr(form_instance, form_repr, user=None):
+    """Update DB representation of a form. Idempotent and race-safe.
+
+    On `IntegrityError` (typically from a concurrent caller racing us on the
+    very first snapshot), swallow the error, refresh the representation and
+    short-circuit — the other request's write is now visible to ours.
+    """
+    try:
+        with transaction.atomic():
+            _do_update(form_instance, form_repr, user=user)
+    except IntegrityError:
+        logger.debug(
+            "update_form_db_repr: lost a race for %s; refreshing",
+            form_repr.full_name,
+        )
+        form_repr.refresh_from_db()
+
+
+def _snapshot_is_fresh(form_full_name: str) -> bool:
+    last = _LAST_SNAPSHOT.get(form_full_name)
+    return last is not None and (time.monotonic() - last) < SNAPSHOT_TTL_SECONDS
+
+
+def _mark_snapshot_fresh(form_full_name: str) -> None:
+    _LAST_SNAPSHOT[form_full_name] = time.monotonic()
 
 
 @transaction.atomic
@@ -93,19 +123,18 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
 
     from formdefaults.models import FormRepresentation
 
-    form_repr, crt = FormRepresentation.objects.get_or_create(full_name=fn)
+    form_repr, _ = FormRepresentation.objects.get_or_create(
+        full_name=fn, defaults={"label": label or fn},
+    )
 
     if update_db_repr:
-        if label is not None:
-            if form_repr.label != label:
-                form_repr.label = label
-                form_repr.save()
+        if label is not None and form_repr.label != label:
+            form_repr.label = label
+            form_repr.save(update_fields=["label"])
+        if not _snapshot_is_fresh(fn):
+            update_form_db_repr(form_instance, form_repr, user=None)
+            _mark_snapshot_fresh(fn)
 
-        # Automatyczne tworzenie reprezentacji bazodanowej formularza w tej
-        # funkcji NIE przewiduje tworzenia oddzielnych ustaleń dla danego użytkownika
-        update_form_db_repr(form_instance, form_repr, user=None)
-
-    # Weź listę domyślnych wartości (czyli takich gdzie user=None)
     values = {
         qs["field__name"]: qs["value"]
         for qs in form_repr.values_set.filter(user=None)
@@ -113,7 +142,6 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
         .values("field__name", "value")
     }
 
-    # Weź listę wartości dla danego użytkownika
     if user is not None:
         user_values = {
             qs["field__name"]: qs["value"]
@@ -129,5 +157,4 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
             "formdefaults_post_html": form_repr.html_after,
         }
     )
-
     return values
