@@ -5,6 +5,13 @@
 <h1>Ustawienia użytkownika</h1>
 <p><em>Rejestracja: setting <code>FORMDEFAULTS_FORMS</code> w <code>example_project/settings.py</code>.</em></p>
 <div class="form-card">
+  <div class="form-card-header">
+    <h2>Formularz</h2>
+    {% formdefaults_button form %}
+  </div>
+  {% if form.initial.formdefaults_pre_html %}
+    <div class="fd-pre">{{ form.initial.formdefaults_pre_html|safe }}</div>
+  {% endif %}
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -12,9 +19,9 @@
       <button type="submit">Zapisz</button>
     </div>
   </form>
-  <div class="actions">
-    {% formdefaults_button form %}
-  </div>
+  {% if form.initial.formdefaults_post_html %}
+    <div class="fd-post">{{ form.initial.formdefaults_post_html|safe }}</div>
+  {% endif %}
 </div>
 {% if submitted %}<pre>{{ submitted }}</pre>{% endif %}
 {% endblock %}
