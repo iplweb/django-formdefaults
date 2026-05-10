@@ -4,34 +4,35 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/django-formdefaults.svg)](https://pypi.org/project/django-formdefaults/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Database-backed default values for Django forms — let users (and admins)
-save the values they typed last time and have them pre-filled on next visit.
+Database-backed default values for Django forms. Plug it into any Django form
+in one line and admins (system-wide) plus end-users (personal overrides) can
+curate `Form.initial` from the UI.
 
 Originally extracted from [iplweb/bpp](https://github.com/iplweb/bpp).
 
-## What it does
+## Idea
 
-Most non-trivial Django apps eventually grow a "remember what I last
-selected" feature on report forms, filter forms, search forms.
-`django-formdefaults` is the small infrastructure for that:
+When a form is rendered, `django-formdefaults`:
 
-- Inspect any Django form, snapshot its fields into the database.
-- For each field, store one *or many* default values:
-  - **No `user` set** → the system-wide default (what new users see).
-  - **`user` set**    → that user's personal override.
-- On render, return a dict of `{field_name: value}` ready to feed into
-  `Form(initial=...)` — the user's overrides shadow the global defaults.
-- Show admins a Django admin page where they can curate per-form,
-  per-user defaults without touching code.
-- Bonus: each form can carry `html_before` / `html_after` snippets
-  (also editable from the admin) that you can render around the form —
-  useful for legends, contextual help, in-page docs.
+1. **Builds or refreshes a representation of the form in the DB** — its set
+   of fields, their order, types and labels, and a snapshot of `Form.initial`.
+2. **Lets you set default values per field** — e.g. a boolean that should
+   always default to `True`, a date that should always default to the current
+   month, an integer with a fixed initial.
+3. **Exposes two editing scopes**:
+   - **System-wide** — any superuser edits in Django admin (one default per
+     field, applied to everyone).
+   - **Per-user** — each logged-in user overrides their own copy via a popup
+     rendered next to the form. Their override shadows the system-wide value.
 
-It is deliberately *not*:
+A form's DB representation can be created in **three ways**:
 
-- A form-state-saver (no resume-where-you-left-off mid-edit).
-- A draft-submission system.
-- A wizard.
+- `@register_form` decorator on the Form class — snapshot at Django startup
+  (`post_migrate`).
+- `FORMDEFAULTS_FORMS` setting — list of dotted paths, also snapshot at
+  startup. Useful for forms you don't own.
+- **No registration** — snapshot happens on first render via
+  `get_form_defaults()` / `FormDefaultsMixin`.
 
 ## Installation
 
@@ -39,12 +40,21 @@ It is deliberately *not*:
 pip install django-formdefaults
 ```
 
-Add to `INSTALLED_APPS`:
+`INSTALLED_APPS`:
 
 ```python
 INSTALLED_APPS = [
     # ...
     "formdefaults",
+]
+```
+
+`urls.py` (only required if you want the per-user popup):
+
+```python
+urlpatterns = [
+    # ...
+    path("formdefaults/", include("formdefaults.urls")),
 ]
 ```
 
@@ -54,37 +64,51 @@ Run migrations:
 ./manage.py migrate
 ```
 
-The package requires Django 4.2+ and supports Django up through 5.2.
-Postgres is the original target, but the JSONField storage is
-database-agnostic from Django 3.1 onwards.
+Requires Django 4.2+ and Python 3.10+.
 
 ## Quick start
 
-### In a class-based FormView
+### Path 1 — Decorator (recommended for forms you own)
 
 ```python
-from django.views.generic.edit import FormView
+# myapp/forms.py
+from django import forms
+from formdefaults import register_form
+
+@register_form(label="Monthly report")
+class MonthlyReportForm(forms.Form):
+    year = forms.IntegerField(initial=2026)
+    month = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 13)])
+```
+
+Snapshot is created on `migrate`.
+
+### Path 2 — Setting (for forms you don't own)
+
+```python
+# settings.py
+FORMDEFAULTS_FORMS = [
+    "thirdparty.forms.SomeForm",
+    "myapp.forms.UserSettingsForm",
+]
+```
+
+Optional class-level `formdefaults_label = "..."` becomes the row's label;
+otherwise the class name is used.
+
+### Path 3 — Ad-hoc (no registration)
+
+In a CBV, mix in `FormDefaultsMixin`:
+
+```python
 from formdefaults.helpers import FormDefaultsMixin
-
-from .forms import MonthlyReportForm
-
 
 class MonthlyReportView(FormDefaultsMixin, FormView):
     form_class = MonthlyReportForm
-    template_name = "reports/monthly.html"
-    title = "Monthly report"  # used as the human-readable form label
-
-    def form_valid(self, form):
-        ...
+    title = "Monthly report"
 ```
 
-The first time `MonthlyReportView` is rendered, `formdefaults` snapshots
-the form fields and stores each field's `Form.initial` value as the
-system-wide default. On every subsequent render, `get_initial()` pulls
-those defaults (with the current user's overrides layered on top) and
-hands them to the form.
-
-### Programmatic access
+In an FBV, call `get_form_defaults`:
 
 ```python
 from formdefaults.core import get_form_defaults
@@ -93,68 +117,99 @@ initial = get_form_defaults(MonthlyReportForm(), user=request.user)
 form = MonthlyReportForm(initial=initial)
 ```
 
-### Curating defaults from the Django admin
+Either way, snapshot is created on first render.
 
-Go to **admin → Formdefaults → Lista wartości domyślnych formularza**.
-Pick a form by its label, then for each field add or edit
-`FormFieldDefaultValue` rows:
+## Editing defaults
 
-- Leave **User** empty → system-wide default.
-- Set **User** → personal override for that user only.
-- The **Value** is stored as JSON, so anything `json.dumps()`-able works.
+### System-wide (Django admin)
 
-`html_before` / `html_after` are plain text fields that surface in the
-returned `initial` dict under the keys `formdefaults_pre_html` and
-`formdefaults_post_html`. Render them however your template/form
-layout system likes — e.g. via crispy-forms, plain `{{ form.initial.formdefaults_pre_html|safe }}`,
-or your own helper.
+`/admin/formdefaults/formrepresentation/` — pick a form by label, then for
+each field add or edit a `FormFieldDefaultValue` row with `User` empty.
+
+### Per-user (popup next to the form)
+
+In your template:
+
+```django
+{% load formdefaults static %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form }}
+  <button type="submit">Submit</button>
+  {% formdefaults_button form %}
+</form>
+
+<script src="{% static 'formdefaults/modal.js' %}" defer></script>
+<link rel="stylesheet" href="{% static 'formdefaults/modal.css' %}">
+```
+
+The button only renders for authenticated users. Clicking it opens a modal
+with one input per form field, pre-filled with the user's existing overrides.
+Empty input clears the override.
+
+## Try it locally
+
+```bash
+git clone https://github.com/iplweb/django-formdefaults
+cd django-formdefaults/example_project
+python manage.py migrate
+python manage.py runserver
+```
+
+Visit `http://127.0.0.1:8000/`. Three forms demonstrate all three registration
+paths. Create a superuser (`./manage.py createsuperuser`) to try system-wide
+editing in `/admin/`.
 
 ## Public API
 
 | Symbol | Purpose |
 |---|---|
-| `formdefaults.helpers.FormDefaultsMixin` | Drop-in CBV mixin: provides `get_initial()` and `get_form_title()`. |
-| `formdefaults.core.get_form_defaults(form, label=None, user=None, update_db_repr=True)` | Snapshot the form's fields (if needed), return `{field_name: value}`. |
-| `formdefaults.core.update_form_db_repr(form, form_repr, user=None)` | Lower-level: refresh DB representation of a form's fields. |
-| `formdefaults.models.FormRepresentation` | One row per Django form class. |
-| `formdefaults.models.FormFieldRepresentation` | One row per field of a form. |
-| `formdefaults.models.FormFieldDefaultValue` | One row per (form, field, user-or-null) default value. |
-| `formdefaults.util.full_name(obj)` | `module.ClassName` — used as the form's primary key. |
+| `formdefaults.register_form` | Decorator: register a Form class for startup snapshot. |
+| `formdefaults.helpers.FormDefaultsMixin` | CBV mixin: provides `get_initial()`. |
+| `formdefaults.core.get_form_defaults(form, label=None, user=None, update_db_repr=True)` | Snapshot + return `{field_name: value}`. |
+| `formdefaults.core.update_form_db_repr(form, form_repr, user=None)` | Lower-level: refresh DB representation. |
+| `formdefaults.forms.build_user_defaults_form(form_repr, user, data=None)` | Build the popup edit form. |
+| `formdefaults.views.UserFormDefaultsView` | View backing the popup endpoint. |
+| `{% formdefaults_button form %}` | Template tag rendering the "edit my defaults" button. |
+| `formdefaults.models.FormRepresentation` / `FormFieldRepresentation` / `FormFieldDefaultValue` | DB models. |
 
-## How the storage looks
+## Storage
 
 Three tables:
 
 ```
 FormRepresentation
-  full_name (PK)        # e.g. "myapp.forms.MonthlyReportForm"
-  label                 # human-readable, editable in admin
+  full_name (PK)         # "myapp.forms.MonthlyReportForm"
+  label                  # human-readable
+  pre_registered         # True if registered via decorator/setting
   html_before, html_after
 
 FormFieldRepresentation
   parent → FormRepresentation
   name, label, klass, order
+  unique_together (parent, name)
 
 FormFieldDefaultValue
   parent → FormRepresentation
   field  → FormFieldRepresentation
-  user   → AUTH_USER_MODEL (nullable; null = system-wide)
+  user   → AUTH_USER_MODEL  # nullable; null = system-wide
   value  (JSON)
+  unique constraint (field, user) for non-NULL users
+  unique constraint (field) WHERE user IS NULL for system-wide
 ```
-
-Layering on read: `system-wide values, then user values overlaid on top`.
 
 ## Limitations & gotchas
 
-- A form is identified by its **fully qualified Python path**. Renaming
-  or moving a `Form` class invalidates the saved defaults. There is
-  currently no migration helper for that — rename, then re-curate.
-- Only fields whose `initial` is JSON-serialisable get a stored
-  default. Lambdas / callables on `initial` are skipped silently
-  (they keep working at the form level — they just don't get persisted).
-- `FormFieldDefaultValue.clean()` re-instantiates the form to validate
-  the typed value against the field's `to_python()` / `validate()`.
-  If your form's `__init__` does heavy work, admin saves are slow.
+- Forms identified by fully qualified Python path. Renaming or moving a Form
+  class invalidates the saved defaults.
+- Only fields whose `initial` is JSON-serialisable get a stored default.
+  Lambdas / callables on `initial` keep working at the form level but aren't
+  persisted.
+- `FormFieldDefaultValue.clean()` re-instantiates the form to validate typed
+  values. Forms with heavy `__init__` cost slow down admin saves.
+- The popup is opt-in: it only works if you include `formdefaults.urls`,
+  load the template tag, and serve the static JS/CSS.
 
 ## Running the tests
 
@@ -163,8 +218,7 @@ pip install -e ".[test]"
 pytest
 ```
 
-The test suite uses an in-memory SQLite database — no Postgres is
-required to run it.
+Tests run against PostgreSQL via [testcontainers](https://testcontainers-python.readthedocs.io/) — Docker is required on the test machine.
 
 ## License
 
