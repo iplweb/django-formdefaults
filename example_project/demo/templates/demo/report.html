@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load formdefaults %}
+{% block title %}Raport miesięczny{% endblock %}
+{% block content %}
+<h1>Raport miesięczny</h1>
+<p><em>Rejestracja: dekorator <code>@register_form</code> w <code>demo/forms.py</code>.</em></p>
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="actions">
+      <button type="submit">Generuj</button>
+      {% formdefaults_button form %}
+    </div>
+  </form>
+</div>
+{% if submitted %}<pre>{{ submitted }}</pre>{% endif %}
+{% endblock %}

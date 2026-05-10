@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load formdefaults %}
+{% block title %}Szukaj{% endblock %}
+{% block content %}
+<h1>Szukaj</h1>
+<p><em>Rejestracja: <strong>brak</strong> — snapshot powstaje przy pierwszym renderze.</em></p>
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="actions">
+      <button type="submit">Szukaj</button>
+      {% formdefaults_button form %}
+    </div>
+  </form>
+</div>
+{% if submitted %}<pre>{{ submitted }}</pre>{% endif %}
+{% endblock %}

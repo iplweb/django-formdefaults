@@ -1,0 +1,26 @@
+{% load static %}
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}django-formdefaults demo{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'formdefaults/modal.css' %}">
+  <style>
+    body { font-family: sans-serif; max-width: 720px; margin: 2em auto; padding: 0 1em; }
+    nav a { margin-right: 1em; }
+    .form-card { border: 1px solid #ddd; padding: 1em; border-radius: 6px; }
+    .form-card .actions { display: flex; gap: 1em; align-items: center; margin-top: 0.5em; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'demo:report' %}">Raport</a>
+    <a href="{% url 'demo:settings' %}">Ustawienia</a>
+    <a href="{% url 'demo:search' %}">Szukaj</a>
+    <a href="/admin/">Admin</a>
+  </nav>
+  <hr>
+  {% block content %}{% endblock %}
+  <script src="{% static 'formdefaults/modal.js' %}" defer></script>
+</body>
+</html>

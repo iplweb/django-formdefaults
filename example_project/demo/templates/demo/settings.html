@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load formdefaults %}
+{% block title %}Ustawienia{% endblock %}
+{% block content %}
+<h1>Ustawienia użytkownika</h1>
+<p><em>Rejestracja: setting <code>FORMDEFAULTS_FORMS</code> w <code>example_project/settings.py</code>.</em></p>
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="actions">
+      <button type="submit">Zapisz</button>
+      {% formdefaults_button form %}
+    </div>
+  </form>
+</div>
+{% if submitted %}<pre>{{ submitted }}</pre>{% endif %}
+{% endblock %}
