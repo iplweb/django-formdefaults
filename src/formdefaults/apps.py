@@ -9,3 +9,7 @@ class FormdefaultsConfig(AppConfig):
     # bumping to BigAutoField would surface as a spurious migration on
     # every project that already had this app installed pre-extraction.
     default_auto_field = "django.db.models.AutoField"
+
+    def ready(self):
+        # Connect post_migrate handler.
+        from formdefaults import signals  # noqa: F401
