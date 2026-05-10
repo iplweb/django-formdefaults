@@ -12,4 +12,13 @@ class FormDefaultsMixin:
         return NO_TITLE_FORM
 
     def get_initial(self):
-        return core.get_form_defaults(self.form_class(), self.get_form_title())
+        user = None
+        request = getattr(self, "request", None)
+        if request is not None and getattr(request, "user", None) is not None:
+            if getattr(request.user, "is_authenticated", False):
+                user = request.user
+        return core.get_form_defaults(
+            self.form_class(),
+            self.get_form_title(),
+            user=user,
+        )
