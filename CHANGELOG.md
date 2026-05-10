@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] — 2026-05-10
+
+### Added
+
+- HTML `title` tooltip on every override checkbox in the popup —
+  hovering explains the toggle.
+- Help text in the popup modal explaining the checkbox-vs-value
+  contract, so users discover the UX without reading docs.
+- Polish translation shipped in
+  `src/formdefaults/locale/pl/LC_MESSAGES/django.{po,mo}`.
+
+### Changed
+
+- Package templates (`_button.html`, `_modal_fragment.html`) now use
+  English source strings wrapped in `{% trans %}`. Polish-speaking
+  installs see the same text via `LANGUAGE_CODE='pl'`.
+- example_project is now fully internationalised: English source plus
+  a Polish `.po`/`.mo`, language switcher in nav, `LocaleMiddleware`
+  wired up.
+- README "Per-user popup" section: removed obsolete "Empty input
+  clears the override" sentence (superseded by v0.4.0's override
+  checkbox).
+
 ## [0.4.0] — 2026-05-10
 
 ### Added
