@@ -1,11 +1,18 @@
-"""Minimal Django settings for the django-formdefaults test suite.
+"""Django settings for the test suite, backed by a Postgres container.
 
-Uses an in-memory SQLite database so the suite has no external
-dependencies — Postgres is the original target but the model itself is
-DB-agnostic from Django 3.1 onwards (JSONField).
+A `testcontainers.postgres.PostgresContainer` is started at import time and
+stopped at process exit via `atexit`. Pytest discovers settings before the
+session starts, so module-level start is the simplest correct hook.
 """
-
 from __future__ import annotations
+
+import atexit
+
+from testcontainers.postgres import PostgresContainer
+
+_postgres = PostgresContainer("postgres:16-alpine")
+_postgres.start()
+atexit.register(_postgres.stop)
 
 SECRET_KEY = "django-formdefaults-test-key-not-secret"
 
@@ -17,8 +24,12 @@ INSTALLED_APPS = [
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": _postgres.dbname,
+        "USER": _postgres.username,
+        "PASSWORD": _postgres.password,
+        "HOST": _postgres.get_container_host_ip(),
+        "PORT": _postgres.get_exposed_port(5432),
     }
 }
 

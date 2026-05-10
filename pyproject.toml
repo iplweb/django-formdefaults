@@ -49,6 +49,8 @@ dependencies = [
 test = [
     "pytest>=7",
     "pytest-django>=4.8",
+    "testcontainers[postgres]>=4",
+    "psycopg[binary]>=3",
 ]
 
 [project.urls]
