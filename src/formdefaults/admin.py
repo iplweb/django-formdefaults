@@ -49,7 +49,8 @@ class FormFieldDefaultValueInline(admin.TabularInline):
 
 @admin.register(FormRepresentation)
 class FormRepresentationAdmin(admin.ModelAdmin):
-    list_display = ["label", "full_name"]
+    list_display = ["label", "full_name", "pre_registered"]
+    list_filter = ["pre_registered"]
     inlines = [FormFieldDefaultValueInline]
-    readonly_fields = list_display
-    fields = ["label", "full_name", "html_before", "html_after"]
+    readonly_fields = ["full_name", "pre_registered"]
+    fields = ["label", "full_name", "pre_registered", "html_before", "html_after"]
