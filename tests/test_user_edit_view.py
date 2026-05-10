@@ -81,3 +81,74 @@ def test_build_form_invalid_value(demo_form_repr, user):
     f = build_user_defaults_form(demo_form_repr, user=user, data={"n": "not-a-number", "txt": ""})
     assert not f.is_valid()
     assert "n" in f.errors
+
+
+from django.test import Client
+from django.urls import reverse
+
+
+@pytest.mark.django_db
+def test_view_anonymous_redirected(demo_form_repr):
+    c = Client()
+    url = reverse("formdefaults:user-edit", args=[demo_form_repr.full_name])
+    resp = c.get(url)
+    assert resp.status_code == 302
+    assert "/login/" in resp["Location"]
+
+
+@pytest.mark.django_db
+def test_view_get_returns_fragment(demo_form_repr, user):
+    c = Client()
+    c.force_login(user)
+    url = reverse("formdefaults:user-edit", args=[demo_form_repr.full_name])
+    resp = c.get(url)
+    assert resp.status_code == 200
+    assert b'name="n"' in resp.content
+
+
+@pytest.mark.django_db
+def test_view_post_saves(demo_form_repr, user):
+    c = Client()
+    c.force_login(user)
+    url = reverse("formdefaults:user-edit", args=[demo_form_repr.full_name])
+    resp = c.post(url, {"n": "77", "txt": ""})
+    assert resp.status_code == 200
+
+    field_n = demo_form_repr.fields_set.get(name="n")
+    assert FormFieldDefaultValue.objects.filter(
+        parent=demo_form_repr, field=field_n, user=user
+    ).first().value == 77
+
+
+@pytest.mark.django_db
+def test_view_post_invalid_returns_400(demo_form_repr, user):
+    c = Client()
+    c.force_login(user)
+    url = reverse("formdefaults:user-edit", args=[demo_form_repr.full_name])
+    resp = c.post(url, {"n": "not-a-number", "txt": ""})
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_view_unknown_form_returns_404(user):
+    c = Client()
+    c.force_login(user)
+    url = reverse("formdefaults:user-edit", args=["nonexistent.Form"])
+    resp = c.get(url)
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_view_user_data_in_post_is_ignored(demo_form_repr, user):
+    """Submitting user=<other_user_id> in POST data must not write against
+    another user's overrides."""
+    other = get_user_model().objects.create_user(username="other", password="p")
+    c = Client()
+    c.force_login(user)
+    url = reverse("formdefaults:user-edit", args=[demo_form_repr.full_name])
+    resp = c.post(url, {"n": "77", "txt": "", "user": str(other.id)})
+    assert resp.status_code == 200
+
+    field_n = demo_form_repr.fields_set.get(name="n")
+    assert not FormFieldDefaultValue.objects.filter(field=field_n, user=other).exists()
+    assert FormFieldDefaultValue.objects.filter(field=field_n, user=user).exists()

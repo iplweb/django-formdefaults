@@ -1,0 +1,12 @@
+<div class="fd-modal-backdrop">
+  <div class="fd-modal" role="dialog" aria-modal="true">
+    <button type="button" class="fd-modal-close" aria-label="Close">×</button>
+    <h3>{{ form_repr.label }}</h3>
+    {% if saved %}<p class="fd-saved">Zapisano.</p>{% endif %}
+    <form method="post" data-fd-form>
+      {% csrf_token %}
+      {% include "formdefaults/_user_edit_form.html" with form=edit_form %}
+      <button type="submit" class="fd-submit">Zapisz</button>
+    </form>
+  </div>
+</div>
