@@ -1,0 +1,29 @@
+# django-formdefaults Polish translations.
+msgid ""
+msgstr ""
+"Project-Id-Version: django-formdefaults 0.4.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-10 00:00+0000\n"
+"PO-Revision-Date: 2026-05-10 00:00+0000\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Check to save your override for this field. Uncheck to use the system-wide default."
+msgstr "Zaznacz, aby zapisać własną wartość dla tego pola. Odznacz, aby używać wartości systemowej."
+
+msgid "Close"
+msgstr "Zamknij"
+
+msgid "Check the box next to a field to save your value as your personal override. Leave it unchecked to use the system-wide default."
+msgstr "Zaznacz pole obok wartości, aby zapisać ją jako własne nadpisanie. Pozostaw niezaznaczone, aby używać wartości systemowej."
+
+msgid "Saved."
+msgstr "Zapisano."
+
+msgid "Save"
+msgstr "Zapisz"
+
+msgid "My defaults"
+msgstr "Moje wartości domyślne"
