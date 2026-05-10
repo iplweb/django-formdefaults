@@ -133,3 +133,11 @@ def test_FormFieldDefaultValue_unique_per_user(test_form_repr, test_form, normal
         FormFieldDefaultValue.objects.create(
             parent=test_form_repr, field=field, user=normal_django_user, value=2
         )
+
+
+@pytest.mark.django_db
+def test_get_or_create_for_instance_seeds_label_with_full_name():
+    from formdefaults.util import full_name as _fn
+    fr = FormRepresentation.objects.get_or_create_for_instance(FormForTests())
+    assert fr.label == _fn(FormForTests())
+    assert fr.label != ""

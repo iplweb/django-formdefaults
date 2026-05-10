@@ -19,7 +19,7 @@ class FormRepresentationManager(models.Manager):
         w formacie JSON)
         """
         fn = full_name(form_instance)
-        res, created = self.get_or_create(full_name=fn)
+        res, created = self.get_or_create(full_name=fn, defaults={"label": fn})
         return res
 
 
