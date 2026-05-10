@@ -30,6 +30,13 @@ class FormRepresentation(models.Model):
     html_before = models.TextField("Kod HTML przed formularzem", null=True, blank=True)
     html_after = models.TextField("Kod HTML po formularzu", null=True, blank=True)
 
+    pre_registered = models.BooleanField(
+        "Zarejestrowany przez pre-rejestrację",
+        default=False,
+        help_text="True jeśli formularz został zarejestrowany dekoratorem "
+                  "@register_form lub przez setting FORMDEFAULTS_FORMS.",
+    )
+
     objects = FormRepresentationManager()
 
     def __str__(self):

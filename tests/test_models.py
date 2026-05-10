@@ -96,3 +96,9 @@ def test_FormFieldDefaultValue_default_value_wrong(
     test_field_value_repr.value = "this is not a datetime"
     with pytest.raises(ValidationError, match=r"Nie udało .*"):
         test_field_value_repr.clean()
+
+
+@pytest.mark.django_db
+def test_FormRepresentation_pre_registered_default_false():
+    fr = FormRepresentation.objects.create(full_name="x.Y", label="Y")
+    assert fr.pre_registered is False
