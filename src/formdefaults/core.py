@@ -13,21 +13,6 @@ _LAST_SNAPSHOT: dict[str, float] = {}
 SNAPSHOT_TTL_SECONDS = 60.0
 
 
-def __getattr__(name):
-    """Module-level lazy access to ``formdefaults.models`` symbols.
-
-    ``models.py`` imports from this module, so we cannot import models at the
-    top level (circular). Exposing the model classes through ``__getattr__``
-    lets test code patch e.g. ``formdefaults.core.FormFieldRepresentation``
-    without forcing an eager import at module load.
-    """
-    if name in ("FormFieldRepresentation", "FormFieldDefaultValue", "FormRepresentation"):
-        from formdefaults import models as _models
-
-        return getattr(_models, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 def _do_update(form_instance, form_repr, user=None):
     from formdefaults.models import FormFieldDefaultValue, FormFieldRepresentation
 

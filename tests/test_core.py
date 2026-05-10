@@ -119,7 +119,7 @@ def test_update_form_db_repr_swallows_integrity_error(test_form, test_form_repr)
         return real_get_or_create(*args, **kwargs)
 
     with patch(
-        "formdefaults.core.FormFieldRepresentation.objects.get_or_create",
+        "formdefaults.models.FormFieldRepresentation.objects.get_or_create",
         side_effect=fake_get_or_create,
     ):
         # Should not raise.
