@@ -97,6 +97,17 @@ class FormFieldDefaultValue(models.Model):
     )
     value = JSONField("Wartość", null=True, blank=True)
 
+    is_auto_snapshot = models.BooleanField(
+        "Wartość pochodzi automatycznie z kodu",
+        default=True,
+        help_text=(
+            "True jeśli wartość pochodzi automatycznie z `Form.initial` w "
+            "kodzie. Każda edycja przez admina lub przez popup użytkownika "
+            "ustawia False — wartość staje się 'sticky' i nie jest "
+            "nadpisywana przy kolejnych snapshotach."
+        ),
+    )
+
     # Ustawienie może dotyczyć wyłącznie konkretnego użytkownika lub
     # wszystkich użytkowników systemu
     user = models.ForeignKey(
