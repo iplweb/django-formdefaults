@@ -4,6 +4,7 @@ A `testcontainers.postgres.PostgresContainer` is started at import time and
 stopped at process exit via `atexit`. Pytest discovers settings before the
 session starts, so module-level start is the simplest correct hook.
 """
+
 from __future__ import annotations
 
 import atexit

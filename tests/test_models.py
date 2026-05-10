@@ -1,9 +1,14 @@
 import pytest
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from formdefaults.core import update_form_db_repr
-from formdefaults.models import FormFieldRepresentation, FormRepresentation
+from formdefaults.models import (
+    FormFieldDefaultValue,
+    FormFieldRepresentation,
+    FormRepresentation,
+)
 from formdefaults.util import full_name
 
 
@@ -104,13 +109,8 @@ def test_FormRepresentation_pre_registered_default_false():
     assert fr.pre_registered is False
 
 
-from django.contrib.auth import get_user_model
-from django.db import IntegrityError
-
 @pytest.mark.django_db
 def test_FormFieldDefaultValue_unique_system_wide(test_form_repr, test_form):
-    from formdefaults.core import update_form_db_repr
-    from formdefaults.models import FormFieldDefaultValue
     update_form_db_repr(test_form, test_form_repr)
     field = test_form_repr.fields_set.first()
     FormFieldDefaultValue.objects.filter(field=field, user=None).delete()
@@ -121,8 +121,6 @@ def test_FormFieldDefaultValue_unique_system_wide(test_form_repr, test_form):
 
 @pytest.mark.django_db
 def test_FormFieldDefaultValue_unique_per_user(test_form_repr, test_form, normal_django_user):
-    from formdefaults.core import update_form_db_repr
-    from formdefaults.models import FormFieldDefaultValue
     update_form_db_repr(test_form, test_form_repr)
     field = test_form_repr.fields_set.first()
     FormFieldDefaultValue.objects.filter(field=field, user=normal_django_user).delete()
@@ -148,8 +146,6 @@ def test_FormFieldDefaultValue_system_and_user_coexist(test_form_repr, test_form
     """The same field can have one system-wide row (user=None) AND one
     per-user row simultaneously — that is the whole point of the override
     layer."""
-    from formdefaults.core import update_form_db_repr
-    from formdefaults.models import FormFieldDefaultValue
     update_form_db_repr(test_form, test_form_repr)
     field = test_form_repr.fields_set.first()
     FormFieldDefaultValue.objects.filter(field=field).delete()
