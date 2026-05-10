@@ -22,9 +22,31 @@
 }
 .fd-modal h3 { margin: 0 0 0.75em 0; font-size: 1.15em; }
 .fd-field { margin-bottom: 0.75em; }
-.fd-field label { display: block; font-weight: 600; margin-bottom: 0.25em; }
 .fd-field input, .fd-field select, .fd-field textarea { width: 100%; box-sizing: border-box; }
 .fd-errors { color: #c00; font-size: 0.9em; margin-top: 0.25em; }
 .fd-saved { color: #060; margin: 0 0 0.75em 0; }
 .fd-submit { padding: 0.4em 1em; }
 .fd-edit-btn { font-size: 0.9em; cursor: pointer; }
+.fd-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+.fd-override-cell {
+  padding-top: 0.4em;
+  flex: 0 0 auto;
+}
+.fd-field-body {
+  flex: 1 1 auto;
+  display: block;
+}
+.fd-field-body .fd-field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25em;
+}
+.fd-override-cell input[type="checkbox"] {
+  width: 1.1em;
+  height: 1.1em;
+  cursor: pointer;
+}

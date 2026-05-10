@@ -69,4 +69,17 @@
     });
     host.innerHTML = await resp.text();
   });
+
+  function autoCheckOverride(e) {
+    var fieldRow = e.target.closest && e.target.closest(".fd-field");
+    if (!fieldRow) return;
+    if (e.target.classList && e.target.classList.contains("fd-override-checkbox")) return;
+    var checkbox = fieldRow.querySelector(".fd-override-checkbox");
+    if (checkbox && !checkbox.checked) {
+      checkbox.checked = true;
+    }
+  }
+
+  document.addEventListener("input", autoCheckOverride);
+  document.addEventListener("change", autoCheckOverride);
 })();
