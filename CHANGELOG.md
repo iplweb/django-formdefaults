@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-05-10
+
+### Added
+
+- Per-field override toggle in the popup edit form. Each value field
+  has a companion `_override_<name>` checkbox rendered to its left.
+  Unchecked → the field is **not** written as an override on save (and
+  any existing override is deleted). Checked → the value is upserted as
+  the user's override, regardless of what the value is.
+- `_user_edit_form.html` template uses a new `form.field_pairs()` helper
+  that yields `(override_checkbox, value_field)` tuples in `fields_set`
+  order.
+- `modal.js` auto-checks the override checkbox when the user edits a
+  field's value (input/change events). The user can manually uncheck it
+  to revert.
+- Default initial value for the popup field is now the currently-effective
+  default (user override if present, else system-wide), so the user can
+  see what they're getting and edit from there.
+
+### Changed (BREAKING)
+
+- `build_user_defaults_form().save()` no longer treats empty input as
+  "delete this override". The override checkbox controls write/delete
+  exclusively. POST data must include `_override_<name>=on` for any
+  field the caller wants to upsert.
+- The popup template `_user_edit_form.html` now expects the form to
+  expose `field_pairs()`. Custom templates overriding it must adapt.
+
 ## [0.3.0] — 2026-05-10
 
 ### Added
