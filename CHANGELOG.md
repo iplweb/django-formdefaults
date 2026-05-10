@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-05-10
+
+### Added
+
+- `FormFieldDefaultValue.is_auto_snapshot: bool` — flag identifying rows
+  that came from `Form.initial` automatically and should be kept in sync
+  with the code. Cleared on every UI edit (popup or Django admin),
+  making the value "sticky".
+- `update_form_db_repr` now refreshes value of rows where
+  `is_auto_snapshot=True` and value drifted from current
+  `form_field.initial`. Sticky rows are never touched.
+- Data migration `0007_backfill_is_auto_snapshot` backfills the flag for
+  existing rows: True if `value == form_field.initial`, False otherwise.
+- `formdefaults._autosnap_backfill.resolve_initial` — helper used by the
+  backfill migration; importable from tests.
+
+### Changed
+
+- Popup save (`build_user_defaults_form().save()`) and admin save
+  (`FormRepresentationAdmin.save_formset`) both clear
+  `is_auto_snapshot` on every write so user/admin overrides become
+  sticky immediately.
+
 ## [0.2.0] — 2026-05-10
 
 ### Added

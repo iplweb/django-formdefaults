@@ -198,6 +198,7 @@ FormFieldDefaultValue
   field  → FormFieldRepresentation
   user   → AUTH_USER_MODEL  # nullable; null = system-wide
   value  (JSON)
+  is_auto_snapshot          # True until first UI edit; sticky after
   unique constraint (field, user) for non-NULL users
   unique constraint (field) WHERE user IS NULL for system-wide
 ```
@@ -213,6 +214,13 @@ FormFieldDefaultValue
   values. Forms with heavy `__init__` cost slow down admin saves.
 - The popup is opt-in: it only works if you include `formdefaults.urls`,
   load the template tag, and serve the static JS/CSS.
+- `is_auto_snapshot` is set to True heuristically for pre-0.3.0 rows
+  during the data migration: rows whose value matches the form's
+  current `initial` become `True` (the row looks untouched), the rest
+  become `False`. False positives happen rarely (someone deliberately
+  edited the value to match the code default and the data migration
+  can't tell). False positives become real on the next code change —
+  the value is treated as auto-snapshot and refreshed.
 
 ## Running the tests
 
