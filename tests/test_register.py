@@ -53,9 +53,7 @@ def test_iter_dedupe_decorator_wins():
     class DupForm(forms.Form):
         x = forms.IntegerField()
 
-    with override_settings(
-        FORMDEFAULTS_FORMS=[f"{DupForm.__module__}.DupForm"]
-    ):
+    with override_settings(FORMDEFAULTS_FORMS=[f"{DupForm.__module__}.DupForm"]):
         entries = list(iter_registered_forms())
 
     matches = [e for e in entries if e.form_class is DupForm]
@@ -65,5 +63,6 @@ def test_iter_dedupe_decorator_wins():
 
 class SettingForm(forms.Form):
     """Used by test_iter_includes_settings_path."""
+
     formdefaults_label = "From setting"
     y = forms.CharField()

@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('formdefaults', '0005_unique_field_system'),
+        ("formdefaults", "0005_unique_field_system"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='formfielddefaultvalue',
-            name='is_auto_snapshot',
-            field=models.BooleanField(default=True, help_text="True jeśli wartość pochodzi automatycznie z `Form.initial` w kodzie. Każda edycja przez admina lub przez popup użytkownika ustawia False — wartość staje się 'sticky' i nie jest nadpisywana przy kolejnych snapshotach.", verbose_name='Wartość pochodzi automatycznie z kodu'),
+            model_name="formfielddefaultvalue",
+            name="is_auto_snapshot",
+            field=models.BooleanField(
+                default=True,
+                help_text="True jeśli wartość pochodzi automatycznie z `Form.initial` w kodzie. Każda edycja przez admina lub przez popup użytkownika ustawia False — wartość staje się 'sticky' i nie jest nadpisywana przy kolejnych snapshotach.",
+                verbose_name="Wartość pochodzi automatycznie z kodu",
+            ),
         ),
     ]

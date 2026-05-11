@@ -17,7 +17,9 @@ class MonthlyReportForm(forms.Form):
         initial=datetime.date.today().month,
     )
     include_inactive = forms.BooleanField(
-        label=_("Include inactive"), required=False, initial=False,
+        label=_("Include inactive"),
+        required=False,
+        initial=False,
     )
 
 
@@ -25,10 +27,15 @@ class UserSettingsForm(forms.Form):
     formdefaults_label = _("User settings")
 
     notify_email = forms.BooleanField(
-        label=_("Email notifications"), required=False, initial=True,
+        label=_("Email notifications"),
+        required=False,
+        initial=True,
     )
     items_per_page = forms.IntegerField(
-        label=_("Items per page"), initial=25, min_value=5, max_value=200,
+        label=_("Items per page"),
+        initial=25,
+        min_value=5,
+        max_value=200,
     )
     theme = forms.ChoiceField(
         label=_("Theme"),

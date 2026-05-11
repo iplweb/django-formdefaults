@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('formdefaults', '0002_django32'),
+        ("formdefaults", "0002_django32"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='formrepresentation',
-            name='pre_registered',
-            field=models.BooleanField(default=False, help_text='True jeśli formularz został zarejestrowany dekoratorem @register_form lub przez setting FORMDEFAULTS_FORMS.', verbose_name='Zarejestrowany przez pre-rejestrację'),
+            model_name="formrepresentation",
+            name="pre_registered",
+            field=models.BooleanField(
+                default=False,
+                help_text="True jeśli formularz został zarejestrowany dekoratorem @register_form lub przez setting FORMDEFAULTS_FORMS.",
+                verbose_name="Zarejestrowany przez pre-rejestrację",
+            ),
         ),
     ]

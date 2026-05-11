@@ -38,10 +38,10 @@ jobs:
             django: "5.0"
     steps:
       - uses: actions/checkout@v4
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@v5
       - name: Install package and test deps
         run: |
           uv pip install --system -e ".[test]"

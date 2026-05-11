@@ -26,9 +26,7 @@ def test_post_migrate_snapshots_decorated_form():
 
     snapshot_registered_forms(sender=_Sender)
 
-    fr = FormRepresentation.objects.get(
-        full_name=f"{SnapForm.__module__}.SnapForm"
-    )
+    fr = FormRepresentation.objects.get(full_name=f"{SnapForm.__module__}.SnapForm")
     assert fr.label == "Snap1"
     assert fr.pre_registered is True
     assert fr.fields_set.count() == 2

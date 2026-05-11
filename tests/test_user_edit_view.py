@@ -1,6 +1,11 @@
+import datetime as _dt
+
 import pytest
 from django import forms
 from django.contrib.auth import get_user_model
+from django.template import Context, Template
+from django.test import Client, RequestFactory
+from django.urls import reverse
 
 from formdefaults.core import update_form_db_repr
 from formdefaults.forms import build_user_defaults_form
@@ -54,9 +59,12 @@ def test_build_form_save_creates_override(demo_form_repr, user):
 
     field_n = demo_form_repr.fields_set.get(name="n")
     field_txt = demo_form_repr.fields_set.get(name="txt")
-    assert FormFieldDefaultValue.objects.filter(
-        parent=demo_form_repr, field=field_n, user=user
-    ).count() == 1
+    assert (
+        FormFieldDefaultValue.objects.filter(
+            parent=demo_form_repr, field=field_n, user=user
+        ).count()
+        == 1
+    )
     # txt checkbox not posted → no override saved
     assert not FormFieldDefaultValue.objects.filter(
         parent=demo_form_repr, field=field_txt, user=user
@@ -70,13 +78,15 @@ def test_build_form_save_idempotent(demo_form_repr, user):
         user=user,
         data={"n": "55", "txt": "", "_override_n": "on"},
     )
-    f1.is_valid(); f1.save()
+    f1.is_valid()
+    f1.save()
     f2 = build_user_defaults_form(
         demo_form_repr,
         user=user,
         data={"n": "66", "txt": "", "_override_n": "on"},
     )
-    f2.is_valid(); f2.save()
+    f2.is_valid()
+    f2.save()
 
     field_n = demo_form_repr.fields_set.get(name="n")
     rows = FormFieldDefaultValue.objects.filter(
@@ -95,7 +105,8 @@ def test_build_form_save_unchecked_deletes_override(demo_form_repr, user):
         user=user,
         data={"n": "55", "txt": "", "_override_n": "on"},
     )
-    f1.is_valid(); f1.save()
+    f1.is_valid()
+    f1.save()
     field_n = demo_form_repr.fields_set.get(name="n")
     assert FormFieldDefaultValue.objects.filter(field=field_n, user=user).exists()
 
@@ -103,7 +114,8 @@ def test_build_form_save_unchecked_deletes_override(demo_form_repr, user):
     f2 = build_user_defaults_form(
         demo_form_repr, user=user, data={"n": "55", "txt": ""}
     )
-    f2.is_valid(); f2.save()
+    f2.is_valid()
+    f2.save()
     assert not FormFieldDefaultValue.objects.filter(field=field_n, user=user).exists()
 
 
@@ -116,10 +128,6 @@ def test_build_form_invalid_value(demo_form_repr, user):
     )
     assert not f.is_valid()
     assert "n" in f.errors
-
-
-from django.test import Client
-from django.urls import reverse
 
 
 @pytest.mark.django_db
@@ -150,9 +158,14 @@ def test_view_post_saves(demo_form_repr, user):
     assert resp.status_code == 200
 
     field_n = demo_form_repr.fields_set.get(name="n")
-    assert FormFieldDefaultValue.objects.filter(
-        parent=demo_form_repr, field=field_n, user=user
-    ).first().value == 77
+    assert (
+        FormFieldDefaultValue.objects.filter(
+            parent=demo_form_repr, field=field_n, user=user
+        )
+        .first()
+        .value
+        == 77
+    )
 
 
 @pytest.mark.django_db
@@ -160,9 +173,7 @@ def test_view_post_invalid_returns_400(demo_form_repr, user):
     c = Client()
     c.force_login(user)
     url = reverse("formdefaults:user-edit", args=[demo_form_repr.full_name])
-    resp = c.post(
-        url, {"n": "not-a-number", "txt": "", "_override_n": "on"}
-    )
+    resp = c.post(url, {"n": "not-a-number", "txt": "", "_override_n": "on"})
     assert resp.status_code == 400
 
 
@@ -194,18 +205,12 @@ def test_view_user_data_in_post_is_ignored(demo_form_repr, user):
     assert FormFieldDefaultValue.objects.filter(field=field_n, user=user).exists()
 
 
-from django.template import Context, Template
-from django.test import RequestFactory
-
-
 @pytest.mark.django_db
 def test_template_tag_renders_button_for_authed_user(demo_form_repr, user):
     rf = RequestFactory()
     request = rf.get("/")
     request.user = user
-    template = Template(
-        "{% load formdefaults %}{% formdefaults_button form %}"
-    )
+    template = Template("{% load formdefaults %}{% formdefaults_button form %}")
     rendered = template.render(Context({"request": request, "form": DemoForm()}))
     assert "fd-edit-btn" in rendered
     assert demo_form_repr.full_name in rendered
@@ -214,17 +219,13 @@ def test_template_tag_renders_button_for_authed_user(demo_form_repr, user):
 @pytest.mark.django_db
 def test_template_tag_renders_nothing_for_anonymous():
     from django.contrib.auth.models import AnonymousUser
+
     rf = RequestFactory()
     request = rf.get("/")
     request.user = AnonymousUser()
-    template = Template(
-        "{% load formdefaults %}{% formdefaults_button form %}"
-    )
+    template = Template("{% load formdefaults %}{% formdefaults_button form %}")
     rendered = template.render(Context({"request": request, "form": DemoForm()}))
     assert "fd-edit-btn" not in rendered
-
-
-import datetime as _dt
 
 
 class _DateForm(forms.Form):
@@ -272,7 +273,9 @@ def test_initial_value_is_system_wide_when_no_override(demo_form_repr, user):
     system-wide value as the field's initial — not empty."""
     field_n = demo_form_repr.fields_set.get(name="n")
     # Sanity: system-wide value for n was snapshotted as 10 (from DemoForm.n.initial).
-    sys_row = FormFieldDefaultValue.objects.get(parent=demo_form_repr, field=field_n, user=None)
+    sys_row = FormFieldDefaultValue.objects.get(
+        parent=demo_form_repr, field=field_n, user=None
+    )
     assert sys_row.value == 10
 
     f = build_user_defaults_form(demo_form_repr, user=user)

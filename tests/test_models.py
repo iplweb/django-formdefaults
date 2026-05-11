@@ -114,13 +114,19 @@ def test_FormFieldDefaultValue_unique_system_wide(test_form_repr, test_form):
     update_form_db_repr(test_form, test_form_repr)
     field = test_form_repr.fields_set.first()
     FormFieldDefaultValue.objects.filter(field=field, user=None).delete()
-    FormFieldDefaultValue.objects.create(parent=test_form_repr, field=field, user=None, value=1)
+    FormFieldDefaultValue.objects.create(
+        parent=test_form_repr, field=field, user=None, value=1
+    )
     with pytest.raises(IntegrityError):
-        FormFieldDefaultValue.objects.create(parent=test_form_repr, field=field, user=None, value=2)
+        FormFieldDefaultValue.objects.create(
+            parent=test_form_repr, field=field, user=None, value=2
+        )
 
 
 @pytest.mark.django_db
-def test_FormFieldDefaultValue_unique_per_user(test_form_repr, test_form, normal_django_user):
+def test_FormFieldDefaultValue_unique_per_user(
+    test_form_repr, test_form, normal_django_user
+):
     update_form_db_repr(test_form, test_form_repr)
     field = test_form_repr.fields_set.first()
     FormFieldDefaultValue.objects.filter(field=field, user=normal_django_user).delete()
@@ -136,13 +142,16 @@ def test_FormFieldDefaultValue_unique_per_user(test_form_repr, test_form, normal
 @pytest.mark.django_db
 def test_get_or_create_for_instance_seeds_label_with_full_name():
     from formdefaults.util import full_name as _fn
+
     fr = FormRepresentation.objects.get_or_create_for_instance(FormForTests())
     assert fr.label == _fn(FormForTests())
     assert fr.label != ""
 
 
 @pytest.mark.django_db
-def test_FormFieldDefaultValue_system_and_user_coexist(test_form_repr, test_form, normal_django_user):
+def test_FormFieldDefaultValue_system_and_user_coexist(
+    test_form_repr, test_form, normal_django_user
+):
     """The same field can have one system-wide row (user=None) AND one
     per-user row simultaneously — that is the whole point of the override
     layer."""
@@ -150,7 +159,9 @@ def test_FormFieldDefaultValue_system_and_user_coexist(test_form_repr, test_form
     field = test_form_repr.fields_set.first()
     FormFieldDefaultValue.objects.filter(field=field).delete()
 
-    FormFieldDefaultValue.objects.create(parent=test_form_repr, field=field, user=None, value=1)
+    FormFieldDefaultValue.objects.create(
+        parent=test_form_repr, field=field, user=None, value=1
+    )
     FormFieldDefaultValue.objects.create(
         parent=test_form_repr, field=field, user=normal_django_user, value=2
     )
@@ -174,5 +185,6 @@ def test_resolve_initial_finds_form_class(test_form_repr, test_form):
 
 def test_resolve_initial_handles_missing_class():
     from formdefaults._autosnap_backfill import resolve_initial
+
     found, initial = resolve_initial("totally.missing.Form", "x")
     assert found is False

@@ -30,6 +30,7 @@ def register_form(label=None):
         @register_form(label="My pretty form")
         class MyForm(forms.Form): ...
     """
+
     def decorator(form_class):
         _REGISTRY[_full_name(form_class)] = _Entry(form_class, label_kw)
         return form_class

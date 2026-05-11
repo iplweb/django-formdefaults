@@ -1,5 +1,5 @@
 import pytest
-from django.test import Client, override_settings
+from django.test import Client
 
 pytestmark = pytest.mark.django_db
 
@@ -42,9 +42,7 @@ def test_search_view_renders(example_settings):
     c = Client()
     resp = c.get("/search/")
     assert resp.status_code == 200
-    assert FormRepresentation.objects.filter(
-        full_name="demo.forms.SearchForm"
-    ).exists()
+    assert FormRepresentation.objects.filter(full_name="demo.forms.SearchForm").exists()
 
 
 def test_post_migrate_pre_registers_decorator_form(example_settings):

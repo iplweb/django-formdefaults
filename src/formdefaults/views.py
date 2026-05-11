@@ -12,11 +12,15 @@ class UserFormDefaultsView(LoginRequiredMixin, View):
     def get(self, request, form_full_name):
         form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
         edit_form = build_user_defaults_form(form_repr, user=request.user)
-        return render(request, self.template, {
-            "form_repr": form_repr,
-            "edit_form": edit_form,
-            "saved": False,
-        })
+        return render(
+            request,
+            self.template,
+            {
+                "form_repr": form_repr,
+                "edit_form": edit_form,
+                "saved": False,
+            },
+        )
 
     def post(self, request, form_full_name):
         form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
@@ -25,13 +29,22 @@ class UserFormDefaultsView(LoginRequiredMixin, View):
         )
         if edit_form.is_valid():
             edit_form.save()
-            return render(request, self.template, {
+            return render(
+                request,
+                self.template,
+                {
+                    "form_repr": form_repr,
+                    "edit_form": edit_form,
+                    "saved": True,
+                },
+            )
+        return render(
+            request,
+            self.template,
+            {
                 "form_repr": form_repr,
                 "edit_form": edit_form,
-                "saved": True,
-            })
-        return render(request, self.template, {
-            "form_repr": form_repr,
-            "edit_form": edit_form,
-            "saved": False,
-        }, status=400)
+                "saved": False,
+            },
+            status=400,
+        )

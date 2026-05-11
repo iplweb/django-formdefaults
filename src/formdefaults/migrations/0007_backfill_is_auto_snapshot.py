@@ -17,7 +17,7 @@ def forwards(apps, schema_editor):
             row.is_auto_snapshot = False
             row.save(update_fields=["is_auto_snapshot"])
             continue
-        row.is_auto_snapshot = (row.value == initial)
+        row.is_auto_snapshot = row.value == initial
         row.save(update_fields=["is_auto_snapshot"])
 
 

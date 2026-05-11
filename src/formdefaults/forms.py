@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 
 from formdefaults.models import FormFieldDefaultValue
 
-
 _OVERRIDE_PREFIX = "_override_"
 
 
@@ -105,13 +104,15 @@ def build_user_defaults_form(form_repr, user, data=None):
             required=False,
             initial=has_override,
             label="",
-            widget=forms.CheckboxInput(attrs={
-                "class": "fd-override-checkbox",
-                "title": _(
-                    "Check to save your override for this field. "
-                    "Uncheck to use the system-wide default."
-                ),
-            }),
+            widget=forms.CheckboxInput(
+                attrs={
+                    "class": "fd-override-checkbox",
+                    "title": _(
+                        "Check to save your override for this field. "
+                        "Uncheck to use the system-wide default."
+                    ),
+                }
+            ),
         )
         field_defs[_OVERRIDE_PREFIX + db_field.name] = override_field
 

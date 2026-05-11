@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('formdefaults', '0004_unique_field_user'),
+        ("formdefaults", "0004_unique_field_user"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='formfielddefaultvalue',
-            constraint=models.UniqueConstraint(condition=models.Q(('user__isnull', True)), fields=('field',), name='fd_unique_field_system'),
+            model_name="formfielddefaultvalue",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("user__isnull", True)),
+                fields=("field",),
+                name="fd_unique_field_system",
+            ),
         ),
     ]

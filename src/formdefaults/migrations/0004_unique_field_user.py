@@ -5,19 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('formdefaults', '0003_formrepresentation_pre_registered'),
+        ("formdefaults", "0003_formrepresentation_pre_registered"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='formfielddefaultvalue',
-            index=models.Index(fields=['parent', 'user'], name='fd_parent_user_idx'),
+            model_name="formfielddefaultvalue",
+            index=models.Index(fields=["parent", "user"], name="fd_parent_user_idx"),
         ),
         migrations.AddConstraint(
-            model_name='formfielddefaultvalue',
-            constraint=models.UniqueConstraint(fields=('field', 'user'), name='fd_unique_field_user'),
+            model_name="formfielddefaultvalue",
+            constraint=models.UniqueConstraint(
+                fields=("field", "user"), name="fd_unique_field_user"
+            ),
         ),
     ]

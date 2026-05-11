@@ -23,8 +23,6 @@ def _do_update(form_instance, form_repr, user=None):
     # Delete fields that are no longer in the form
     form_repr.fields_set.filter(~Q(name__in=form_fields_names)).delete()
 
-    db_fields = {f.name: f for f in form_repr.fields_set.all()}
-
     for no, field_name in enumerate(form_fields_names):
         form_field = form_fields[field_name]
         new_klass = full_name(form_field)
@@ -61,7 +59,9 @@ def _do_update(form_instance, form_repr, user=None):
 
         _upsert_auto_value(form_repr, db_field, user=None, code_value=form_field_value)
         if user is not None:
-            _upsert_auto_value(form_repr, db_field, user=user, code_value=form_field_value)
+            _upsert_auto_value(
+                form_repr, db_field, user=user, code_value=form_field_value
+            )
 
 
 def _upsert_auto_value(form_repr, db_field, *, user, code_value):
@@ -116,7 +116,8 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
     from formdefaults.models import FormRepresentation
 
     form_repr, _ = FormRepresentation.objects.get_or_create(
-        full_name=fn, defaults={"label": label or fn},
+        full_name=fn,
+        defaults={"label": label or fn},
     )
 
     if update_db_repr:
@@ -129,15 +130,15 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
 
     values = {
         qs["field__name"]: qs["value"]
-        for qs in form_repr.values_set.filter(user=None)
-        .values("field__name", "value")
+        for qs in form_repr.values_set.filter(user=None).values("field__name", "value")
     }
 
     if user is not None:
         user_values = {
             qs["field__name"]: qs["value"]
-            for qs in form_repr.values_set.filter(user=user)
-            .values("field__name", "value")
+            for qs in form_repr.values_set.filter(user=user).values(
+                "field__name", "value"
+            )
         }
         values.update(user_values)
 

@@ -2,10 +2,9 @@ from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import FormView
 
+from demo.forms import MonthlyReportForm, SearchForm, UserSettingsForm
 from formdefaults.core import get_form_defaults
 from formdefaults.helpers import FormDefaultsMixin
-
-from demo.forms import MonthlyReportForm, SearchForm, UserSettingsForm
 
 
 class MonthlyReportView(FormDefaultsMixin, FormView):
@@ -14,8 +13,11 @@ class MonthlyReportView(FormDefaultsMixin, FormView):
     title = _("Monthly report")
 
     def form_valid(self, form):
-        return render(self.request, "demo/report.html",
-                      {"form": form, "submitted": form.cleaned_data})
+        return render(
+            self.request,
+            "demo/report.html",
+            {"form": form, "submitted": form.cleaned_data},
+        )
 
 
 class UserSettingsView(FormDefaultsMixin, FormView):
@@ -24,8 +26,11 @@ class UserSettingsView(FormDefaultsMixin, FormView):
     title = _("User settings")
 
     def form_valid(self, form):
-        return render(self.request, "demo/settings.html",
-                      {"form": form, "submitted": form.cleaned_data})
+        return render(
+            self.request,
+            "demo/settings.html",
+            {"form": form, "submitted": form.cleaned_data},
+        )
 
 
 def search_view(request):

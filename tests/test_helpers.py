@@ -23,7 +23,7 @@ def test_mixin_uses_request_user(normal_django_user):
     host.request = MagicMock()
     host.request.user = normal_django_user
 
-    initial = host.get_initial()
+    host.get_initial()
     fr = FormRepresentation.objects.get(full_name=full_name(_F()))
     field = fr.fields_set.get(name="n")
     FormFieldDefaultValue.objects.update_or_create(
@@ -36,6 +36,7 @@ def test_mixin_uses_request_user(normal_django_user):
 @pytest.mark.django_db
 def test_mixin_anonymous_falls_back_to_system_wide():
     from django.contrib.auth.models import AnonymousUser
+
     host = _MixinHost()
     host.request = MagicMock()
     host.request.user = AnonymousUser()

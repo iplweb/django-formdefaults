@@ -34,7 +34,7 @@ class FormRepresentation(models.Model):
         "Zarejestrowany przez pre-rejestrację",
         default=False,
         help_text="True jeśli formularz został zarejestrowany dekoratorem "
-                  "@register_form lub przez setting FORMDEFAULTS_FORMS.",
+        "@register_form lub przez setting FORMDEFAULTS_FORMS.",
     )
 
     objects = FormRepresentationManager()
