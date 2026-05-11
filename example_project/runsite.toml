@@ -1,0 +1,33 @@
+# run-site configuration for the django-formdefaults example project.
+# Generated initially by `run-site init`; tuned for the demo.
+
+[project]
+name = "formdefaults-demo"
+manage_py = "manage.py"
+django_module = "example_project"
+
+[python]
+# Pin to `uv run --no-sync python` so deps come from the parent
+# package's pyproject.toml (the [example] optional-dep group).
+command = ["uv", "run", "--no-sync", "python"]
+
+[postgres]
+# Random free port; password is per-container ephemeral.
+db = "formdefaults_demo"
+user = "formdefaults_demo"
+
+[redis]
+# Random free port.
+db = 0
+
+[superuser]
+username = "admin"
+password = "admin"
+email = "admin@example.com"
+overwrite = true
+
+[celery]
+enabled = false
+
+[banner]
+show_db_credentials = true

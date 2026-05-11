@@ -45,3 +45,11 @@ docs/superpowers/
 # Local
 *.log
 example_project/db.sqlite3
+
+# run-site & django-dev-helpers ephemeral dotfiles (regenerated per run,
+# may contain dev tokens/credentials — keep them out of git).
+.run-site-config
+.dev_helpers_token
+.dev_helpers_port
+.dev_helpers_pg_*
+.dev_helpers_redis_*

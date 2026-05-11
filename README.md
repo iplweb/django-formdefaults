@@ -282,13 +282,28 @@ previously-saved override.
 ```bash
 git clone https://github.com/iplweb/django-formdefaults
 cd django-formdefaults/example_project
+```
+
+Then either:
+
+```bash
+# Plain Django — SQLite, no extra deps
 python manage.py migrate
 python manage.py runserver
 ```
 
-Visit `http://127.0.0.1:8000/`. Three forms demonstrate all three registration
-paths. Create a superuser (`./manage.py createsuperuser`) to try system-wide
-editing in `/admin/`.
+or, with the `[example]` extra installed
+(`pip install -e ".[example]"`):
+
+```bash
+# Via run-site (the same dev orchestrator we use in real projects)
+python manage.py run_site
+```
+
+Visit <http://127.0.0.1:8000/>. Three forms demonstrate all three
+registration paths. Create a superuser
+(`python manage.py createsuperuser`) to try system-wide editing in
+`/admin/`.
 
 ## Public API
 

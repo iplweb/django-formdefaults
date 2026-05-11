@@ -8,7 +8,7 @@ version = "0.6.0"
 description = "Per-user, database-backed default values for Django forms — lets users (and admins) save the values they typed last time."
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Michał Pasternak", email = "michal.dtz@gmail.com" },
 ]
@@ -51,6 +51,15 @@ test = [
     "pytest>=7",
     "pytest-django>=4.8",
     "testcontainers[postgres]>=4",
+    "psycopg[binary]>=3",
+]
+example = [
+    # Bundled dev stack for `example_project/`:
+    # - run-site spins up Postgres + Redis testcontainers and runs `runserver`
+    # - django-dev-helpers exposes `manage.py run_site` (wraps `run-site run`),
+    #   plus an autologin endpoint and dotfiles for LLM coding agents.
+    "run-site>=0.4",
+    "django-dev-helpers>=0.1.2",
     "psycopg[binary]>=3",
 ]
 
