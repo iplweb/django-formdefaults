@@ -11,6 +11,39 @@ curate `Form.initial` from the UI.
 
 Originally extracted from [iplweb/bpp](https://github.com/iplweb/bpp).
 
+## Why?
+
+Django forms usually default to whatever a developer hard-coded in
+`Form.initial` — fine for a brand-new form, painful when the same user
+fills the same form weekly with the same five fields. This package lets
+admins curate defaults system-wide from the UI, and lets each user
+override their own defaults via a popup. No code changes per form.
+
+## Features
+
+- **Two editing scopes** — system-wide (admins, via Django admin) and
+  per-user (end users, via a popup next to the form). Per-user overrides
+  shadow system-wide values.
+- **Three ways to register a form** — `@register_form` decorator,
+  `FORMDEFAULTS_FORMS` setting (for forms you don't own), or zero
+  registration (snapshot on first render via `FormDefaultsMixin` /
+  `get_form_defaults`).
+- **Vanilla-JS popup**, no jQuery / HTMX dependency. Renders a modal
+  with one input per form field, pre-filled with the currently-effective
+  default. Companion checkbox per field decides whether to upsert or
+  clear the override.
+- **Auto-snapshot lifecycle** — rows tracking the code-level `Form.initial`
+  auto-refresh when developers change `initial=...`, but become sticky
+  the moment a user/admin edits them in the UI.
+- **JSON-storable defaults** — covers the common Django field types
+  (numbers, strings, booleans, dates/datetimes/times, `ModelChoiceField`
+  PKs); non-serialisable lambdas/callables keep working at the form
+  level but aren't persisted.
+- **Optional in-form HTML** — each form representation has
+  `html_before`/`html_after` text fields available as
+  `formdefaults_pre_html` / `formdefaults_post_html` in the form's
+  `initial` dict.
+
 ## Idea
 
 When a form is rendered, `django-formdefaults`:
@@ -36,6 +69,14 @@ A form's DB representation can be created in **three ways**:
   `get_form_defaults()` / `FormDefaultsMixin`.
 
 ## Installation
+
+Using [uv](https://docs.astral.sh/uv/) (recommended):
+
+```bash
+uv add django-formdefaults
+```
+
+Using pip:
 
 ```bash
 pip install django-formdefaults
@@ -65,7 +106,26 @@ Run migrations:
 ./manage.py migrate
 ```
 
-Requires Django 4.2+ and Python 3.10+.
+## Supported versions
+
+### Python
+
+| 3.10 | 3.11 | 3.12 | 3.13 |
+|------|------|------|------|
+| ✓    | ✓    | ✓    | ✓    |
+
+### Django × Python
+
+| Django  | 3.10 | 3.11 | 3.12 | 3.13 | Status                          |
+|---------|------|------|------|------|---------------------------------|
+| 4.2 LTS | ✓    | ✓    | ✓    | —    | EOL April 2026                  |
+| 5.0     | ✓    | ✓    | ✓    | —    | EOL April 2025                  |
+| 5.1     | ✓    | ✓    | ✓    | ✓    | EOL December 2025               |
+| 5.2 LTS | ✓    | ✓    | ✓    | ✓    | Active LTS (extended Apr 2028)  |
+| 6.0     | —    | —    | ✓    | ✓    | Pre-release (testing on `--pre`)|
+
+Cells reflect what CI actually exercises — see
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml).
 
 ## Quick start
 

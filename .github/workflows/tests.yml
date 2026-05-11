@@ -26,6 +26,7 @@ jobs:
   test:
     name: py${{ matrix.python-version }} / django ${{ matrix.django }}
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +37,16 @@ jobs:
             django: "4.2"
           - python-version: "3.13"
             django: "5.0"
+        include:
+          # Django 6.0 is in pre-release as of 2026-05; supports Python 3.12+.
+          # Tracked on --prerelease=allow so alpha/beta breakage is visible
+          # but doesn't block PRs (continue-on-error above).
+          - python-version: "3.12"
+            django: "6.0"
+            experimental: true
+          - python-version: "3.13"
+            django: "6.0"
+            experimental: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -45,7 +56,11 @@ jobs:
       - name: Install package and test deps
         run: |
           uv pip install --system -e ".[test]"
-          uv pip install --system "Django~=${{ matrix.django }}.0"
+          if [ "${{ matrix.django }}" = "6.0" ]; then
+            uv pip install --system --prerelease=allow "Django>=6.0a1,<7"
+          else
+            uv pip install --system "Django~=${{ matrix.django }}.0"
+          fi
       - name: Show resolved versions
         run: uv pip list --system
       - name: Run pytest
