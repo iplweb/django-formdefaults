@@ -28,6 +28,24 @@
 }
 .fd-field { margin-bottom: 0.75em; }
 .fd-field input, .fd-field select, .fd-field textarea { width: 100%; box-sizing: border-box; }
+/* Radio/checkbox inputs in the value cell shouldn't stretch to 100%
+   width — that's what pushes the text label onto a new line. */
+.fd-field input[type="radio"],
+.fd-field input[type="checkbox"] {
+  width: auto;
+  margin: 0 0.4em 0 0;
+  vertical-align: middle;
+}
+/* RadioSelect / CheckboxSelectMultiple render each option as a <label>
+   wrapping the input + visible text. Override the bold/block styling
+   meant for the main field label so option labels sit inline with
+   their radio. */
+.fd-field-body label {
+  display: inline-block;
+  font-weight: normal;
+  cursor: pointer;
+  margin-bottom: 0;
+}
 .fd-errors { color: #c00; font-size: 0.9em; margin-top: 0.25em; }
 .fd-saved { color: #060; margin: 0 0 0.75em 0; }
 .fd-submit { padding: 0.4em 1em; }
