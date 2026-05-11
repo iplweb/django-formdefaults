@@ -33,6 +33,12 @@ env/
 .DS_Store
 Thumbs.db
 
+# uv
+uv.lock
+
+# Dev scaffolding (AI plans/specs, contain personal paths)
+docs/superpowers/
+
 # Local
 *.log
 example_project/db.sqlite3
