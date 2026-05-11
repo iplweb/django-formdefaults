@@ -1,5 +1,8 @@
 {% load i18n %}
 {% if show %}
-<button type="button" class="fd-edit-btn" data-fd-url="{{ url }}">⚙ {% trans "My defaults" %}</button>
+<button type="button" class="fd-edit-btn" data-fd-url="{{ url }}"><span class="fd-icon" aria-hidden="true">⚙</span> {% trans "My defaults" %}</button>
+{% if show_system %}
+<button type="button" class="fd-edit-btn fd-edit-btn-system" data-fd-url="{{ system_url }}"><span class="fd-icon" aria-hidden="true">⚙</span> {% trans "System defaults" %}</button>
+{% endif %}
 <div class="fd-modal-host" data-fd-for="{{ form_full_name }}" hidden></div>
 {% endif %}

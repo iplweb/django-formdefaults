@@ -67,6 +67,10 @@
       credentials: "same-origin",
       headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrfFromCookie() },
     });
+    if (resp.ok) {
+      close(host);
+      return;
+    }
     host.innerHTML = await resp.text();
   });
 

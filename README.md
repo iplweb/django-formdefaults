@@ -11,6 +11,18 @@ curate `Form.initial` from the UI.
 
 Originally extracted from [iplweb/bpp](https://github.com/iplweb/bpp).
 
+## Screenshots
+
+| Regular user | Superuser |
+|---|---|
+| ![Per-user defaults only](docs/screenshots/user-personal-only.png) | ![Both buttons](docs/screenshots/admin-both-buttons.png) |
+| One button — opens the popup that edits *their own* override. | Two buttons — adds a second popup for editing the system-wide default that every user sees. |
+
+System-wide editor (admins only — by default `is_superuser`, overridable
+per-form or globally via a hook):
+
+![System-wide defaults modal](docs/screenshots/admin-system-modal.png)
+
 ## Why?
 
 Django forms usually default to whatever a developer hard-coded in
@@ -21,9 +33,13 @@ override their own defaults via a popup. No code changes per form.
 
 ## Features
 
-- **Two editing scopes** — system-wide (admins, via Django admin) and
-  per-user (end users, via a popup next to the form). Per-user overrides
-  shadow system-wide values.
+- **Two editing scopes** — system-wide (admins) and per-user (end users),
+  both available from a popup next to the form. Per-user overrides shadow
+  system-wide values.
+- **Permission hook** — `formdefaults_can_edit_system_wide(user, form_repr)`
+  decides who sees the "System defaults" button. Default: `user.is_superuser`.
+  Overridable per-form via a class attribute or globally via the
+  `FORMDEFAULTS_CAN_EDIT_SYSTEM_WIDE` setting.
 - **Three ways to register a form** — `@register_form` decorator,
   `FORMDEFAULTS_FORMS` setting (for forms you don't own), or zero
   registration (snapshot on first render via `FormDefaultsMixin` /
@@ -182,10 +198,35 @@ Either way, snapshot is created on first render.
 
 ## Editing defaults
 
+### System-wide — popup (preferred)
+
+When the current user passes the
+`formdefaults_can_edit_system_wide(user, form_repr)` permission check
+(default: `is_superuser`), `{% formdefaults_button form %}` renders a
+second button — **System defaults** — that opens the same popup but bound
+to `FormFieldDefaultValue` rows with `user=NULL`. The modal is visibly
+flagged so admins don't mistakenly edit the wrong scope.
+
+To restrict or expand who can edit system-wide defaults:
+
+```python
+# settings.py — global override
+FORMDEFAULTS_CAN_EDIT_SYSTEM_WIDE = "myapp.permissions.can_edit_fd_system"
+```
+
+```python
+# myapp/forms.py — per-form override (wins over the global one)
+class SecretForm(forms.Form):
+    formdefaults_can_edit_system_wide = staticmethod(
+        lambda user, form_repr: user.is_superuser and user.username == "alice"
+    )
+```
+
 ### System-wide (Django admin)
 
-`/admin/formdefaults/formrepresentation/` — pick a form by label, then for
-each field add or edit a `FormFieldDefaultValue` row with `User` empty.
+Still available at `/admin/formdefaults/formrepresentation/` — pick a form
+by label, then for each field add or edit a `FormFieldDefaultValue` row
+with `User` empty.
 
 The `FormRepresentation` row also has `html_before` and `html_after` text
 fields, useful for surfacing in-form legends, contextual help, or a quick
@@ -258,8 +299,10 @@ editing in `/admin/`.
 | `formdefaults.core.get_form_defaults(form, label=None, user=None, update_db_repr=True)` | Snapshot + return `{field_name: value}`. |
 | `formdefaults.core.update_form_db_repr(form, form_repr, user=None)` | Lower-level: refresh DB representation. |
 | `formdefaults.forms.build_user_defaults_form(form_repr, user, data=None)` | Build the popup edit form. |
-| `formdefaults.views.UserFormDefaultsView` | View backing the popup endpoint. |
-| `{% formdefaults_button form %}` | Template tag rendering the "edit my defaults" button. |
+| `formdefaults.views.UserFormDefaultsView` | View backing the per-user popup endpoint. |
+| `formdefaults.views.SystemFormDefaultsView` | View backing the system-wide popup endpoint. |
+| `formdefaults.permissions.can_edit_system_wide_defaults(user, form_repr=None, form_class=None)` | Resolve the permission hook (per-form attr → setting → default). |
+| `{% formdefaults_button form %}` | Template tag rendering the personal button — and, if the hook allows, the system-defaults button. |
 | `formdefaults.models.FormRepresentation` / `FormFieldRepresentation` / `FormFieldDefaultValue` | DB models. |
 
 ## Storage

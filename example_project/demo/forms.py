@@ -49,6 +49,12 @@ class UserSettingsForm(forms.Form):
 
 
 class SearchForm(forms.Form):
+    """Per-form opt-out: even superusers cannot edit system-wide defaults
+    for this form. Demonstrates the `formdefaults_can_edit_system_wide`
+    hook on a form class."""
+
+    formdefaults_can_edit_system_wide = staticmethod(lambda user, form_repr: False)
+
     q = forms.CharField(label=_("Search"), required=False, initial="")
     sort_by = forms.ChoiceField(
         label=_("Sort by"),

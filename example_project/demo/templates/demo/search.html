@@ -4,6 +4,7 @@
 {% block content %}
 <h1>{% trans "Search" %}</h1>
 <p><em>{% blocktrans %}Registration: <strong>none</strong> — snapshot happens on first render.{% endblocktrans %}</em></p>
+<p><em>{% blocktrans %}This form opts out of system-wide editing via <code>formdefaults_can_edit_system_wide = lambda user, fr: False</code> — even admins see only the personal button.{% endblocktrans %}</em></p>
 <div class="form-card">
   <div class="form-card-header">
     <h2>{% trans "Form" %}</h2>

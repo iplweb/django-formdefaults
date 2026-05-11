@@ -27,3 +27,21 @@ msgstr "Zapisz"
 
 msgid "My defaults"
 msgstr "Moje wartości domyślne"
+
+msgid "System defaults"
+msgstr "Wartości systemowe"
+
+msgid "system-wide defaults"
+msgstr "wartości systemowe"
+
+msgid "Heads up: you are editing values that apply to ALL users. Per-user overrides will continue to take precedence over these."
+msgstr "Uwaga: edytujesz wartości obowiązujące WSZYSTKICH użytkowników. Indywidualne nadpisania konkretnych użytkowników nadal będą miały pierwszeństwo nad tymi wartościami."
+
+msgid "Check the box next to a field to save a system-wide default. Uncheck to remove the system-wide default entirely (the form's own initial value will be used)."
+msgstr "Zaznacz pole obok wartości, aby zapisać ją jako wartość systemową. Odznacz, aby usunąć wartość systemową (zostanie użyta wartość początkowa z definicji formularza)."
+
+msgid "Log out"
+msgstr "Wyloguj"
+
+msgid "Log in"
+msgstr "Zaloguj"

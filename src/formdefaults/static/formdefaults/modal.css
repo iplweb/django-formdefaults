@@ -55,3 +55,30 @@
   height: 1.1em;
   cursor: pointer;
 }
+.fd-icon {
+  display: inline-block;
+  font-family: "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif;
+  font-weight: normal;
+}
+.fd-edit-btn-system {
+  margin-left: 0.25em;
+}
+.fd-edit-btn-system .fd-icon::after {
+  /* Tiny "people" hint to differentiate from the personal button without
+     changing the icon. Renders as a small superscript next to the cog. */
+  content: "+";
+  font-size: 0.75em;
+  vertical-align: super;
+  margin-left: 0.05em;
+}
+.fd-modal-system {
+  border-top: 4px solid #d4a72c;  /* amber accent, not error-red */
+}
+.fd-warning {
+  background: #fff8e1;
+  border-left: 4px solid #d4a72c;
+  color: #5b4500;
+  padding: 0.5em 0.75em;
+  margin: 0 0 0.75em 0;
+  font-size: 0.9em;
+}

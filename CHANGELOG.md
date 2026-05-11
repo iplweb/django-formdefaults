@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-05-11
+
+### Added
+
+- **System-wide defaults from the popup.** A second "System defaults"
+  button next to the personal one opens the same modal bound to
+  `FormFieldDefaultValue` rows with `user=NULL`. Modal is visibly flagged
+  (amber accent, "applies to ALL users" notice) to avoid scope mistakes.
+- `formdefaults.views.SystemFormDefaultsView` (`formdefaults:system-edit`
+  URL) — backs the new popup; reuses `build_user_defaults_form(user=None)`
+  and validates via the permission hook.
+- `formdefaults.permissions.can_edit_system_wide_defaults(user, form_repr=None, form_class=None)`
+  — pluggable permission hook. Resolution order: per-form class attribute
+  `formdefaults_can_edit_system_wide(user, form_repr) -> bool` → settings
+  `FORMDEFAULTS_CAN_EDIT_SYSTEM_WIDE` (dotted path) → default
+  (`user.is_superuser`).
+- Demo: `SearchForm` in `example_project` opts out of system-wide editing
+  via the per-form attribute, exercising the hook end-to-end.
+- README "Screenshots" section embedding three rendered shots (regular
+  user, admin both-buttons, admin system modal) under
+  `docs/screenshots/`.
+- Polish translations for the new strings ("System defaults",
+  system-wide warning text, modal help).
+
+### Changed
+
+- `{% formdefaults_button form %}` now renders a second button only when
+  the permission hook returns True for the request user — otherwise the
+  output is unchanged.
+- Popup closes automatically on a successful save (HTTP 200). Errors
+  (HTTP 400) still re-render in place with field-level error messages.
+
 ## [0.4.1] — 2026-05-10
 
 ### Added

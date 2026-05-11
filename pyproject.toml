@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-formdefaults"
-version = "0.4.1"
+version = "0.5.0"
 description = "Per-user, database-backed default values for Django forms — lets users (and admins) save the values they typed last time."
 readme = "README.md"
 license = { text = "MIT" }

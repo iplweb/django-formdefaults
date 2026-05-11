@@ -32,6 +32,14 @@
       <a href="{% url 'demo:search' %}">{% trans "Search" %}</a>
       <a href="/admin/">{% trans "Admin" %}</a>
     </span>
+    <span class="who">
+      {% if request.user.is_authenticated %}
+        {{ request.user.username }}{% if request.user.is_superuser %} <strong>(superuser)</strong>{% endif %}
+        &nbsp;|&nbsp; <a href="/admin/logout/?next={{ request.path }}">{% trans "Log out" %}</a>
+      {% else %}
+        <a href="/admin/login/?next={{ request.path }}">{% trans "Log in" %}</a>
+      {% endif %}
+    </span>
     <span class="lang-switch">
       {% get_current_language as LANGUAGE_CODE %}
       <form action="{% url 'set_language' %}" method="post">
