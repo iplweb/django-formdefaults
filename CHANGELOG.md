@@ -19,9 +19,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   left alone (its own 3-state widget already covers the case).
   Existing rows are not migrated — `value=True/False` continues to
   round-trip correctly.
+- System-wide warning split into two sentences with a `<br>` between
+  them so the callout reads as two short clauses instead of one long
+  wrapped paragraph.
+
+### Fixed
+
+- Radio and checkbox inputs in the modal no longer stretch to 100% of
+  the row width (which used to push their text label onto the next
+  line). Single-input fields keep their full-width look.
 
 ### Added
 
+- Optional `[example]` extra pulling
+  [`run-site`](https://pypi.org/project/run-site/) and
+  [`django-dev-helpers`](https://pypi.org/project/django-dev-helpers/).
+  With it installed, `manage.py run_site` spins up the example project
+  with auto-created `admin/admin` user and an autologin endpoint —
+  matches our real-project dev experience. The bundled
+  `example_project/runsite.toml` and a `.run-site-config`-aware
+  `settings.py` make Postgres swap-in transparent.
 - Polish translations for the new radio labels.
 
 ## [0.5.0] — 2026-05-11
