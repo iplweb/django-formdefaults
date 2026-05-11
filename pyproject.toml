@@ -58,8 +58,11 @@ example = [
     # - run-site spins up Postgres + Redis testcontainers and runs `runserver`
     # - django-dev-helpers exposes `manage.py run_site` (wraps `run-site run`),
     #   plus an autologin endpoint and dotfiles for LLM coding agents.
-    "run-site>=0.4",
-    "django-dev-helpers>=0.1.2",
+    # django-run-site 0.5.0 is not yet on PyPI — install from the GitHub tag.
+    # (The 0.4 release was published as `run-site`; the project was renamed
+    # to `django-run-site` starting in 0.5.)
+    "django-run-site @ git+https://github.com/iplweb/django-run-site.git@v0.5.0",
+    "django-dev-helpers>=0.1.3",
     "psycopg[binary]>=3",
 ]
 
@@ -68,6 +71,11 @@ Homepage = "https://github.com/iplweb/django-formdefaults"
 Repository = "https://github.com/iplweb/django-formdefaults"
 Issues = "https://github.com/iplweb/django-formdefaults/issues"
 Changelog = "https://github.com/iplweb/django-formdefaults/blob/main/CHANGELOG.md"
+
+[tool.hatch.metadata]
+# Required because `project.optional-dependencies.example` contains a direct
+# git URL (django-run-site is not yet on PyPI under its new name).
+allow-direct-references = true
 
 [tool.hatch.build.targets.sdist]
 include = [
