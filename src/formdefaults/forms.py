@@ -89,15 +89,41 @@ def build_user_defaults_form(form_repr, user, data=None):
         original = template.fields.get(db_field.name)
         if original is None:
             continue
-        cloned = copy.deepcopy(original)
-        cloned.required = False
-        cloned.label = db_field.label or db_field.name
 
         has_override = db_field.name in user_overrides
         if has_override:
-            cloned.initial = user_overrides[db_field.name]
+            current_value = user_overrides[db_field.name]
         else:
-            cloned.initial = system_values.get(db_field.name)
+            current_value = system_values.get(db_field.name)
+
+        # Plain BooleanField gets a 2-option radio ("Default: checked" /
+        # "Default: unchecked") instead of a single checkbox. A bare
+        # checkbox is ambiguous in this UI: the unchecked state could
+        # mean "no override" or "override = False", and the value cell
+        # already lives next to its own override-toggle checkbox.
+        # NullBooleanField is excluded — it's a subclass with its own
+        # 3-state widget that already disambiguates.
+        if isinstance(original, forms.BooleanField) and not isinstance(
+            original, forms.NullBooleanField
+        ):
+            cloned = forms.TypedChoiceField(
+                required=False,
+                coerce=lambda v: v == "true",
+                empty_value=False,
+                choices=[
+                    ("true", _("Default: checked")),
+                    ("false", _("Default: unchecked")),
+                ],
+                widget=forms.RadioSelect(attrs={"class": "fd-bool-radio"}),
+                label=db_field.label or db_field.name,
+                help_text=original.help_text,
+                initial="true" if current_value else "false",
+            )
+        else:
+            cloned = copy.deepcopy(original)
+            cloned.required = False
+            cloned.label = db_field.label or db_field.name
+            cloned.initial = current_value
         field_defs[db_field.name] = cloned
 
         override_field = forms.BooleanField(

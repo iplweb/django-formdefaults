@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] — 2026-05-11
+
+### Changed
+
+- **`BooleanField` is now rendered as a 2-option radio in the popup**
+  ("Default: checked" / "Default: unchecked"), not a single checkbox.
+  The previous checkbox-as-value plus checkbox-as-override layout was
+  ambiguous — an unchecked value cell could mean either "no override"
+  or "override = False", and the override toggle was the wrong place
+  to disambiguate. The radio makes the saved default explicit while
+  the override toggle stays single-purpose. `NullBooleanField` is
+  left alone (its own 3-state widget already covers the case).
+  Existing rows are not migrated — `value=True/False` continues to
+  round-trip correctly.
+
+### Added
+
+- Polish translations for the new radio labels.
+
 ## [0.5.0] — 2026-05-11
 
 ### Added

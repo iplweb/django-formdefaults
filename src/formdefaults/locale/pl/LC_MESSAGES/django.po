@@ -45,3 +45,9 @@ msgstr "Wyloguj"
 
 msgid "Log in"
 msgstr "Zaloguj"
+
+msgid "Default: checked"
+msgstr "Domyślnie zaznaczone"
+
+msgid "Default: unchecked"
+msgstr "Domyślnie niezaznaczone"

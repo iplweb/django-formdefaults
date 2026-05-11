@@ -304,3 +304,109 @@ def test_field_pairs_yields_in_field_order(demo_form_repr, user):
     pairs = list(f.field_pairs())
     names = [pair[1].name for pair in pairs]
     assert names == ["n", "txt"]
+
+
+# -----------------------------------------------------------------------------
+# BooleanField → 2-radio widget (added in 0.6.0)
+# -----------------------------------------------------------------------------
+
+
+class DemoBoolForm(forms.Form):
+    flag = forms.BooleanField(label="Flag", required=False, initial=True)
+    counter = forms.IntegerField(label="Counter", initial=0)
+
+
+class DemoNullBoolForm(forms.Form):
+    maybe = forms.NullBooleanField(label="Maybe", required=False)
+
+
+@pytest.fixture
+def demo_bool_repr(db):
+    instance = DemoBoolForm()
+    fr, _ = FormRepresentation.objects.get_or_create(full_name=full_name(instance))
+    update_form_db_repr(instance, fr)
+    return fr
+
+
+@pytest.fixture
+def demo_nullbool_repr(db):
+    instance = DemoNullBoolForm()
+    fr, _ = FormRepresentation.objects.get_or_create(full_name=full_name(instance))
+    update_form_db_repr(instance, fr)
+    return fr
+
+
+@pytest.mark.django_db
+def test_booleanfield_renders_as_two_radio_options(demo_bool_repr, user):
+    """A plain BooleanField is shown as 'Default: checked' / 'Default:
+    unchecked' radio pair instead of a single checkbox."""
+    f = build_user_defaults_form(demo_bool_repr, user=user)
+    field = f.fields["flag"]
+    assert isinstance(field, forms.TypedChoiceField)
+    assert isinstance(field.widget, forms.RadioSelect)
+    choice_values = [c[0] for c in field.choices]
+    assert choice_values == ["true", "false"]
+    # IntegerField stays as IntegerField.
+    assert isinstance(f.fields["counter"], forms.IntegerField)
+
+
+@pytest.mark.django_db
+def test_booleanfield_radio_initial_reflects_current_default(demo_bool_repr, user):
+    """The radio pre-selects the currently-effective value (system-wide
+    or user override). DemoBoolForm.flag has initial=True, snapshotted
+    as system-wide → radio defaults to 'true'."""
+    f = build_user_defaults_form(demo_bool_repr, user=user)
+    assert f.fields["flag"].initial == "true"
+
+    # Now the user has an override = False → radio should pre-select 'false'.
+    field_flag = demo_bool_repr.fields_set.get(name="flag")
+    FormFieldDefaultValue.objects.create(
+        parent=demo_bool_repr, field=field_flag, user=user, value=False
+    )
+    f2 = build_user_defaults_form(demo_bool_repr, user=user)
+    assert f2.fields["flag"].initial == "false"
+
+
+@pytest.mark.django_db
+def test_booleanfield_radio_save_stores_bool(demo_bool_repr, user):
+    """Submitting 'false' from the radio coerces back to Python bool
+    and writes False (not the string 'false') into the JSON value."""
+    f = build_user_defaults_form(
+        demo_bool_repr,
+        user=user,
+        data={"flag": "false", "counter": "0", "_override_flag": "on"},
+    )
+    assert f.is_valid(), f.errors
+    f.save()
+
+    field_flag = demo_bool_repr.fields_set.get(name="flag")
+    row = FormFieldDefaultValue.objects.get(field=field_flag, user=user)
+    assert row.value is False  # not the string "false"
+
+
+@pytest.mark.django_db
+def test_booleanfield_radio_save_true(demo_bool_repr, user):
+    """Submitting 'true' stores Python True."""
+    f = build_user_defaults_form(
+        demo_bool_repr,
+        user=user,
+        data={"flag": "true", "counter": "0", "_override_flag": "on"},
+    )
+    assert f.is_valid(), f.errors
+    f.save()
+
+    field_flag = demo_bool_repr.fields_set.get(name="flag")
+    row = FormFieldDefaultValue.objects.get(field=field_flag, user=user)
+    assert row.value is True
+
+
+@pytest.mark.django_db
+def test_nullbooleanfield_keeps_three_state_widget(demo_nullbool_repr, user):
+    """NullBooleanField has its own 3-state semantics (True/False/None)
+    and must not be downgraded to the 2-option radio."""
+    f = build_user_defaults_form(demo_nullbool_repr, user=user)
+    field = f.fields["maybe"]
+    # NullBooleanField cloned by deepcopy — still a NullBooleanField,
+    # not the radio TypedChoiceField from the BooleanField branch.
+    assert isinstance(field, forms.NullBooleanField)
+    assert not isinstance(field.widget, forms.RadioSelect)
