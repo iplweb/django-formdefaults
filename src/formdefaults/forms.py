@@ -15,9 +15,9 @@ def _serialize(value):
 
     Covers the common Django field types whose `Form.initial` is JSON-able
     when snapshotted. For unsupported types, falls back to `str(value)`."""
-    if value is None or isinstance(value, (bool, int, float, str, list, dict)):
+    if value is None or isinstance(value, bool | int | float | str | list | dict):
         return value
-    if isinstance(value, (datetime.date, datetime.datetime, datetime.time)):
+    if isinstance(value, datetime.date | datetime.datetime | datetime.time):
         return value.isoformat()
     if hasattr(value, "pk"):  # ModelChoiceField etc.
         return value.pk
