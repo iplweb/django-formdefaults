@@ -1,5 +1,6 @@
 # django-formdefaults
 
+[![tests](https://github.com/iplweb/django-formdefaults/actions/workflows/tests.yml/badge.svg)](https://github.com/iplweb/django-formdefaults/actions/workflows/tests.yml)
 [![PyPI version](https://img.shields.io/pypi/v/django-formdefaults.svg)](https://pypi.org/project/django-formdefaults/)
 [![Python versions](https://img.shields.io/pypi/pyversions/django-formdefaults.svg)](https://pypi.org/project/django-formdefaults/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
