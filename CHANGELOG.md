@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] — 2026-05-11
+
+### Fixed
+
+- `[example]` extra: switch from the unpublished `run-site>=0.4` /
+  `django-dev-helpers>=0.1.2` pins to `django-run-site @
+  git+https://github.com/iplweb/django-run-site.git@v0.5.0` and
+  `django-dev-helpers>=0.1.3`. The 0.4 line shipped on PyPI as
+  `run-site`; the project was renamed to `django-run-site` for 0.5
+  and the new name is not yet on PyPI, so we pull the v0.5.0 tag
+  directly from GitHub. `[tool.hatch.metadata]
+  allow-direct-references = true` was added so the build accepts the
+  git URL. Core package (`django-formdefaults` itself) is unchanged.
+
 ## [0.6.0] — 2026-05-11
 
 ### Changed
