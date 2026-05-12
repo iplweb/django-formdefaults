@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-formdefaults-example 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-10 01:03-0500\n"
+"POT-Creation-Date: 2026-05-12 04:36-0500\n"
 "PO-Revision-Date: 2026-05-10 01:03-0500\n"
 "Last-Translator: Michał Pasternak <michal.dtz@gmail.com>\n"
 "Language-Team: Polish\n"
@@ -19,7 +19,7 @@ msgstr ""
 "n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #: demo/forms.py:11 demo/templates/demo/report.html:3
-#: demo/templates/demo/report.html:5 demo/views.py:14
+#: demo/templates/demo/report.html:5 demo/views.py:13
 msgid "Monthly report"
 msgstr "Raport miesięczny"
 
@@ -35,50 +35,50 @@ msgstr "Miesiąc"
 msgid "Include inactive"
 msgstr "Uwzględnij nieaktywnych"
 
-#: demo/forms.py:25 demo/templates/demo/settings.html:3
-#: demo/templates/demo/settings.html:5 demo/views.py:24
+#: demo/forms.py:27 demo/templates/demo/settings.html:3
+#: demo/templates/demo/settings.html:5 demo/views.py:26
 msgid "User settings"
 msgstr "Ustawienia użytkownika"
 
-#: demo/forms.py:28
+#: demo/forms.py:30
 msgid "Email notifications"
 msgstr "Powiadomienia e-mail"
 
-#: demo/forms.py:31
+#: demo/forms.py:35
 msgid "Items per page"
 msgstr "Pozycji na stronę"
 
-#: demo/forms.py:34
+#: demo/forms.py:41
 msgid "Theme"
 msgstr "Motyw"
 
-#: demo/forms.py:36
+#: demo/forms.py:43
 msgid "Light"
 msgstr "Jasny"
 
-#: demo/forms.py:37
+#: demo/forms.py:44
 msgid "Dark"
 msgstr "Ciemny"
 
-#: demo/forms.py:38
+#: demo/forms.py:45
 msgid "System"
 msgstr "Systemowy"
 
-#: demo/forms.py:45 demo/templates/base.html:32
+#: demo/forms.py:58 demo/templates/base.html:32
 #: demo/templates/demo/search.html:3 demo/templates/demo/search.html:5
-#: demo/templates/demo/search.html:19
+#: demo/templates/demo/search.html:20
 msgid "Search"
 msgstr "Szukaj"
 
-#: demo/forms.py:47
+#: demo/forms.py:60
 msgid "Sort by"
 msgstr "Sortuj wg"
 
-#: demo/forms.py:48
+#: demo/forms.py:61
 msgid "Name"
 msgstr "Nazwa"
 
-#: demo/forms.py:48
+#: demo/forms.py:61
 msgid "Date"
 msgstr "Data"
 
@@ -98,13 +98,23 @@ msgstr "Ustawienia"
 msgid "Admin"
 msgstr "Admin"
 
+#: demo/templates/base.html:38
+msgid "Log out"
+msgstr "Wyloguj"
+
+#: demo/templates/base.html:40
+msgid "Log in"
+msgstr "Zaloguj"
+
 #: demo/templates/demo/report.html:6
 msgid ""
 "Registration: <code>@register_form</code> decorator in <code>demo/forms.py</"
 "code>."
-msgstr "Rejestracja: dekorator <code>@register_form</code> w <code>demo/forms.py</code>."
+msgstr ""
+"Rejestracja: dekorator <code>@register_form</code> w <code>demo/forms.py</"
+"code>."
 
-#: demo/templates/demo/report.html:9 demo/templates/demo/search.html:9
+#: demo/templates/demo/report.html:9 demo/templates/demo/search.html:10
 #: demo/templates/demo/settings.html:9
 msgid "Form"
 msgstr "Formularz"
@@ -115,26 +125,40 @@ msgstr "Generuj"
 
 #: demo/templates/demo/search.html:6
 msgid "Registration: <strong>none</strong> — snapshot happens on first render."
-msgstr "Rejestracja: <strong>brak</strong> — snapshot powstaje przy pierwszym renderze."
+msgstr ""
+"Rejestracja: <strong>brak</strong> — snapshot powstaje przy pierwszym "
+"renderze."
+
+#: demo/templates/demo/search.html:7
+msgid ""
+"This form opts out of system-wide editing via "
+"<code>formdefaults_can_edit_system_wide = lambda user, fr: False</code> — "
+"even admins see only the personal button."
+msgstr ""
+"Ten formularz rezygnuje z edycji wartości systemowych przez "
+"<code>formdefaults_can_edit_system_wide = lambda user, fr: False</code> — "
+"nawet administratorzy widzą tylko przycisk dla wartości osobistej."
 
 #: demo/templates/demo/settings.html:6
 msgid ""
 "Registration: <code>FORMDEFAULTS_FORMS</code> setting in "
 "<code>example_project/settings.py</code>."
-msgstr "Rejestracja: ustawienie <code>FORMDEFAULTS_FORMS</code> w <code>example_project/settings.py</code>."
+msgstr ""
+"Rejestracja: ustawienie <code>FORMDEFAULTS_FORMS</code> w "
+"<code>example_project/settings.py</code>."
 
 #: demo/templates/demo/settings.html:19
 msgid "Save"
 msgstr "Zapisz"
 
-#: demo/views.py:35
+#: demo/views.py:40
 msgid "Search form"
 msgstr "Formularz wyszukiwania"
 
-#: example_project/settings.py:60
+#: example_project/settings.py:118
 msgid "English"
 msgstr "Angielski"
 
-#: example_project/settings.py:61
+#: example_project/settings.py:119
 msgid "Polish"
 msgstr "Polski"

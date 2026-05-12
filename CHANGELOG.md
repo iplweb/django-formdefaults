@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] — 2026-05-12
+
+### Fixed
+
+- Polish `.po` no longer overrides Django core translation of
+  `msgid "Log in"` with the abbreviated `"Zaloguj"`. The package's
+  PO file was inadvertently carrying msgids it doesn't itself use
+  (collected from `example_project/demo/`), and Django merges
+  per-app translations on top of core — so once `formdefaults` was
+  installed, the Django admin login page lost the `" się"` suffix.
+  `Log in` and `Log out` removed from the package PO/MO; Django
+  core's "Zaloguj się" / "Wyloguj się" now wins.
+- Translation catalogs split cleanly: the published package
+  catalog (`src/formdefaults/locale/`) now only contains msgids
+  used inside `src/formdefaults/`, and the demo catalog
+  (`example_project/demo/locale/`) holds demo-only strings.
+  Source `#:` references in the package PO are restored so future
+  `makemessages` runs are reproducible. Two harvest scopes are
+  enforced by `cd`-ing into the right directory.
+
+### Added
+
+- Top-level `Makefile` with `messages` / `messages-pkg` /
+  `messages-example` / `compilemessages*` targets. Each runs
+  `makemessages` from the correct cwd so demo strings can never
+  leak into the published catalog. Parameterized with `LOCALE=…`
+  (named to avoid clashing with the shell's `$LANG`).
+
 ## [0.6.1] — 2026-05-11
 
 ### Fixed

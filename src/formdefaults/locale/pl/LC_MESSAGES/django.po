@@ -3,54 +3,77 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-formdefaults 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-10 00:00+0000\n"
+"POT-Creation-Date: 2026-05-12 11:35+0200\n"
 "PO-Revision-Date: 2026-05-10 00:00+0000\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Check to save your override for this field. Uncheck to use the system-wide default."
-msgstr "Zaznacz, aby zapisać własną wartość dla tego pola. Odznacz, aby używać wartości systemowej."
-
-msgid "Close"
-msgstr "Zamknij"
-
-msgid "Check the box next to a field to save your value as your personal override. Leave it unchecked to use the system-wide default."
-msgstr "Zaznacz pole obok wartości, aby zapisać ją jako własne nadpisanie. Pozostaw niezaznaczone, aby używać wartości systemowej."
-
-msgid "Saved."
-msgstr "Zapisano."
-
-msgid "Save"
-msgstr "Zapisz"
-
-msgid "My defaults"
-msgstr "Moje wartości domyślne"
-
-msgid "System defaults"
-msgstr "Wartości systemowe"
-
-msgid "system-wide defaults"
-msgstr "wartości systemowe"
-
-msgid "Heads up: you are editing values that apply to ALL users."
-msgstr "Uwaga: edytujesz wartości obowiązujące WSZYSTKICH użytkowników."
-
-msgid "Per-user overrides will continue to take precedence over these."
-msgstr "Indywidualne nadpisania konkretnych użytkowników nadal będą miały pierwszeństwo nad tymi wartościami."
-
-msgid "Check the box next to a field to save a system-wide default. Uncheck to remove the system-wide default entirely (the form's own initial value will be used)."
-msgstr "Zaznacz pole obok wartości, aby zapisać ją jako wartość systemową. Odznacz, aby usunąć wartość systemową (zostanie użyta wartość początkowa z definicji formularza)."
-
-msgid "Log out"
-msgstr "Wyloguj"
-
-msgid "Log in"
-msgstr "Zaloguj"
-
+#: forms.py:114
 msgid "Default: checked"
 msgstr "Domyślnie zaznaczone"
 
+#: forms.py:115
 msgid "Default: unchecked"
 msgstr "Domyślnie niezaznaczone"
+
+#: forms.py:137
+msgid ""
+"Check to save your override for this field. Uncheck to use the system-wide "
+"default."
+msgstr ""
+"Zaznacz, aby zapisać własną wartość dla tego pola. Odznacz, aby używać "
+"wartości systemowej."
+
+#: templates/formdefaults/_button.html:3
+msgid "My defaults"
+msgstr "Moje wartości domyślne"
+
+#: templates/formdefaults/_button.html:5
+msgid "System defaults"
+msgstr "Wartości systemowe"
+
+#: templates/formdefaults/_modal_fragment.html:4
+msgid "Close"
+msgstr "Zamknij"
+
+#: templates/formdefaults/_modal_fragment.html:5
+msgid "system-wide defaults"
+msgstr "wartości systemowe"
+
+#: templates/formdefaults/_modal_fragment.html:8
+msgid "Heads up: you are editing values that apply to ALL users."
+msgstr "Uwaga: edytujesz wartości obowiązujące WSZYSTKICH użytkowników."
+
+#: templates/formdefaults/_modal_fragment.html:9
+msgid "Per-user overrides will continue to take precedence over these."
+msgstr ""
+"Indywidualne nadpisania konkretnych użytkowników nadal będą miały "
+"pierwszeństwo nad tymi wartościami."
+
+#: templates/formdefaults/_modal_fragment.html:11
+msgid ""
+"Check the box next to a field to save a system-wide default. Uncheck to "
+"remove the system-wide default entirely (the form's own initial value will "
+"be used)."
+msgstr ""
+"Zaznacz pole obok wartości, aby zapisać ją jako wartość systemową. Odznacz, "
+"aby usunąć wartość systemową (zostanie użyta wartość początkowa z definicji "
+"formularza)."
+
+#: templates/formdefaults/_modal_fragment.html:13
+msgid ""
+"Check the box next to a field to save your value as your personal override. "
+"Leave it unchecked to use the system-wide default."
+msgstr ""
+"Zaznacz pole obok wartości, aby zapisać ją jako własne nadpisanie. Pozostaw "
+"niezaznaczone, aby używać wartości systemowej."
+
+#: templates/formdefaults/_modal_fragment.html:15
+msgid "Saved."
+msgstr "Zapisano."
+
+#: templates/formdefaults/_modal_fragment.html:19
+msgid "Save"
+msgstr "Zapisz"
