@@ -72,6 +72,16 @@ jobs:
           else
             uv pip install --system "Django~=${DJANGO_TARGET}.0"
           fi
+          # pytest-django 4.13 dropped Django < 5.2: its _django_db_helper
+          # reads SimpleTestCase._pre_setup_ran_eagerly, which only exists
+          # from Django 5.2 on, so every db test errors out at setup. It
+          # declares no Django floor, so the resolver happily pairs it with
+          # 4.2/5.0/5.1 — hold those targets on the last version that works.
+          case "$DJANGO_TARGET" in
+            4.2 | 5.0 | 5.1)
+              uv pip install --system "pytest-django<4.13"
+              ;;
+          esac
       - name: Show resolved versions
         run: uv pip list --system
       - name: Run pytest

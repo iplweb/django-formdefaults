@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`main`, currently 6.2.dev), so upcoming deprecations surface early
   without failing pull requests.
 
+### Fixed
+
+- CI now installs `pytest-django<4.13` for the Django 4.2, 5.0 and 5.1
+  targets. pytest-django 4.13 dropped support for Django below 5.2 without
+  declaring a version floor, so those seven jobs errored out at fixture
+  setup (`SimpleTestCase._pre_setup_ran_eagerly` does not exist before
+  Django 5.2). The package itself is unaffected — the whole suite passes on
+  4.2, 5.0 and 5.1 once the test runner is paired correctly.
+
 ### Removed
 
 - Python 3.10 from the CI matrix, the README support table and the
