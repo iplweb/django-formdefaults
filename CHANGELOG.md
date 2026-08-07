@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-08-07
+
 ### Added
 
 - Support for Django 6.1 (released 2026-08-05). CI now runs the suite
   against Django 6.1 on Python 3.12 and 3.13, and the package advertises
   the `Framework :: Django :: 6.1` classifier.
 - Django 6.0 promoted from an experimental pre-release job to a regular,
-  blocking CI target now that 6.0 is stable.
+  blocking CI target now that 6.0 is stable. The `Framework :: Django :: 6.0`
+  classifier ships publicly for the first time with this release — the
+  metadata on PyPI previously stopped at 5.2.
 - A non-blocking CI job that installs Django from its development branch
   (`main`, currently 6.2.dev), so upcoming deprecations surface early
   without failing pull requests.
