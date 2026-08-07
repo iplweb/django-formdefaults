@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Support for Django 6.1 (released 2026-08-05). CI now runs the suite
+  against Django 6.1 on Python 3.12 and 3.13, and the package advertises
+  the `Framework :: Django :: 6.1` classifier.
+- Django 6.0 promoted from an experimental pre-release job to a regular,
+  blocking CI target now that 6.0 is stable.
+- A non-blocking CI job that installs Django from its development branch
+  (`main`, currently 6.2.dev), so upcoming deprecations surface early
+  without failing pull requests.
+
+### Fixed
+
+- CI now installs `pytest-django<4.13` for the Django 4.2, 5.0 and 5.1
+  targets. pytest-django 4.13 dropped support for Django below 5.2 without
+  declaring a version floor, so those seven jobs errored out at fixture
+  setup (`SimpleTestCase._pre_setup_ran_eagerly` does not exist before
+  Django 5.2). The package itself is unaffected — the whole suite passes on
+  4.2, 5.0 and 5.1 once the test runner is paired correctly.
+
+### Removed
+
+- Python 3.10 from the CI matrix, the README support table and the
+  trove classifiers. The package has declared `requires-python = ">=3.11"`
+  since 0.6.0, so the 3.10 jobs could never install it and were failing
+  on every run.
+
 ## [0.6.2] — 2026-05-12
 
 ### Fixed

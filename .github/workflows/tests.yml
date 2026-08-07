@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
         django: ["4.2", "5.0", "5.1", "5.2"]
         exclude:
           - python-version: "3.13"
@@ -38,14 +38,22 @@ jobs:
           - python-version: "3.13"
             django: "5.0"
         include:
-          # Django 6.0 is in pre-release as of 2026-05; supports Python 3.12+.
-          # Tracked on --prerelease=allow so alpha/beta breakage is visible
-          # but doesn't block PRs (continue-on-error above).
+          # Django 6.0 and 6.1 are released; both require Python 3.12+,
+          # so they are listed here instead of in the `django` axis
+          # (which would need 3.11 exclusions).
           - python-version: "3.12"
             django: "6.0"
-            experimental: true
           - python-version: "3.13"
             django: "6.0"
+          - python-version: "3.12"
+            django: "6.1"
+          - python-version: "3.13"
+            django: "6.1"
+          # Django's development branch (6.2.dev) — early warning about
+          # upcoming deprecations. Never blocks a PR
+          # (continue-on-error above).
+          - python-version: "3.13"
+            django: "main"
             experimental: true
     steps:
       - uses: actions/checkout@v4
@@ -54,13 +62,26 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
       - name: Install package and test deps
+        env:
+          DJANGO_TARGET: ${{ matrix.django }}
         run: |
           uv pip install --system -e ".[test]"
-          if [ "${{ matrix.django }}" = "6.0" ]; then
-            uv pip install --system --prerelease=allow "Django>=6.0a1,<7"
+          if [ "$DJANGO_TARGET" = "main" ]; then
+            uv pip install --system --prerelease=allow \
+              "https://github.com/django/django/archive/main.tar.gz"
           else
-            uv pip install --system "Django~=${{ matrix.django }}.0"
+            uv pip install --system "Django~=${DJANGO_TARGET}.0"
           fi
+          # pytest-django 4.13 dropped Django < 5.2: its _django_db_helper
+          # reads SimpleTestCase._pre_setup_ran_eagerly, which only exists
+          # from Django 5.2 on, so every db test errors out at setup. It
+          # declares no Django floor, so the resolver happily pairs it with
+          # 4.2/5.0/5.1 — hold those targets on the last version that works.
+          case "$DJANGO_TARGET" in
+            4.2 | 5.0 | 5.1)
+              uv pip install --system "pytest-django<4.13"
+              ;;
+          esac
       - name: Show resolved versions
         run: uv pip list --system
       - name: Run pytest

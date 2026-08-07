@@ -126,19 +126,20 @@ Run migrations:
 
 ### Python
 
-| 3.10 | 3.11 | 3.12 | 3.13 |
-|------|------|------|------|
-| ✓    | ✓    | ✓    | ✓    |
+| 3.11 | 3.12 | 3.13 |
+|------|------|------|
+| ✓    | ✓    | ✓    |
 
 ### Django × Python
 
-| Django  | 3.10 | 3.11 | 3.12 | 3.13 | Status                          |
-|---------|------|------|------|------|---------------------------------|
-| 4.2 LTS | ✓    | ✓    | ✓    | —    | EOL April 2026                  |
-| 5.0     | ✓    | ✓    | ✓    | —    | EOL April 2025                  |
-| 5.1     | ✓    | ✓    | ✓    | ✓    | EOL December 2025               |
-| 5.2 LTS | ✓    | ✓    | ✓    | ✓    | Active LTS (extended Apr 2028)  |
-| 6.0     | —    | —    | ✓    | ✓    | Pre-release (testing on `--pre`)|
+| Django  | 3.11 | 3.12 | 3.13 | Status                          |
+|---------|------|------|------|---------------------------------|
+| 4.2 LTS | ✓    | ✓    | —    | EOL April 2026                  |
+| 5.0     | ✓    | ✓    | —    | EOL April 2025                  |
+| 5.1     | ✓    | ✓    | ✓    | EOL December 2025               |
+| 5.2 LTS | ✓    | ✓    | ✓    | Active LTS (extended Apr 2028)  |
+| 6.0     | —    | ✓    | ✓    | Requires Python 3.12+           |
+| 6.1     | —    | ✓    | ✓    | Requires Python 3.12+           |
 
 Cells reflect what CI actually exercises — see
 [`.github/workflows/tests.yml`](.github/workflows/tests.yml).
