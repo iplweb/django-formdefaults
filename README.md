@@ -316,6 +316,7 @@ registration paths.
 | `formdefaults.helpers.FormDefaultsMixin` | CBV mixin: provides `get_initial()`. |
 | `formdefaults.core.get_form_defaults(form, label=None, user=None, update_db_repr=True)` | Snapshot + return `{field_name: value}`. |
 | `formdefaults.core.update_form_db_repr(form, form_repr, user=None)` | Lower-level: refresh DB representation. |
+| `formdefaults.core.clear_snapshot_cache(form_full_name=None)` | Reset the per-process snapshot freshness cache (all forms or one) — e.g. between tests. |
 | `formdefaults.forms.build_user_defaults_form(form_repr, user, data=None)` | Build the popup edit form. |
 | `formdefaults.views.UserFormDefaultsView` | View backing the per-user popup endpoint. |
 | `formdefaults.views.SystemFormDefaultsView` | View backing the system-wide popup endpoint. |
@@ -358,6 +359,15 @@ FormFieldDefaultValue
   the field is kept without an automatic default — user-edited values are
   never dropped. Callables are called without arguments (as Django does at
   render time), so request-dependent defaults can't be captured.
+- To keep renders cheap, each process remembers for 60 s that a form's
+  structure was snapshotted (marked only after the transaction commits) and
+  skips the snapshot in that window — unless the representation or some of
+  its field rows are missing, which always triggers a fresh snapshot. Test
+  suites that change forms between tests can call
+  `formdefaults.core.clear_snapshot_cache()`.
+- If a stored form class can't be imported any more (renamed/removed form,
+  dynamically built class under a non-importable module), the popup views
+  answer 404 and `FormRepresentation.get_form_class()` returns `None`.
 - `FormFieldDefaultValue.clean()` re-instantiates the form to validate typed
   values. Forms with heavy `__init__` cost slow down admin saves.
 - The popup is opt-in: it only works if you include `formdefaults.urls`,

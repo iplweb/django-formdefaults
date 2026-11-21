@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -5,6 +7,8 @@ from django.db.models import JSONField, Q
 
 from formdefaults.core import get_form_defaults
 from formdefaults.util import full_name, get_python_class_by_name
+
+logger = logging.getLogger(__name__)
 
 
 class FormRepresentationManager(models.Manager):
@@ -43,8 +47,19 @@ class FormRepresentation(models.Model):
         return f"Formularz '{self.label}'"
 
     def get_form_class(self):
-        """Zwraca klasę formularza zapisaną pod self.full_name lub None"""
-        return get_python_class_by_name(self.full_name)
+        """Return the form class stored under `self.full_name`, or None.
+
+        None means the class can't be resolved any more: it was renamed,
+        moved or removed in code, or it was built dynamically under a module
+        that can't be imported. A warning is logged."""
+        try:
+            return get_python_class_by_name(self.full_name)
+        except (ImportError, AttributeError, ValueError) as e:
+            # ValueError: empty module path in importlib.import_module().
+            logger.warning(
+                "formdefaults: cannot resolve form class %r: %s", self.full_name, e
+            )
+            return None
 
     class Meta:
         unique_together = [("full_name", "label")]
@@ -141,14 +156,13 @@ class FormFieldDefaultValue(models.Model):
         # wartość dla danego pola (np wartość dla pola ID jako liczba zmiennoprzecinkowa a nie
         # całkowita), użytkownik powinien otrzymać adekwatny błąd"""
 
-        try:
-            klass = self.parent.get_form_class()
-        except Exception as e:
+        klass = self.parent.get_form_class()
+        if klass is None:
             raise ValidationError(
                 f"Nie udało się odnaleźć klasy formularza w kodzie dla '{self.parent.full_name}'. "
                 f"Weryfikacja wartości domyślnych formularza nie jest możliwa, a co za tym idzie, "
                 f"zapis zmian również. Skontaktuj się z administratorem systemu. "
-            ) from e
+            )
 
         initial = get_form_defaults(klass(), user=self.user, update_db_repr=False)
         initial[self.field.name] = self.value

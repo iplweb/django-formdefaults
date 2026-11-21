@@ -9,17 +9,17 @@ import pytest
 def _reset_formdefaults_snapshot_cache():
     """Reset the per-process snapshot freshness cache between tests.
 
-    ``formdefaults.core._LAST_SNAPSHOT`` skips redundant DB-side snapshot work
-    within a 60-second window. That's correct for production but breaks tests
+    ``formdefaults.core`` skips redundant DB-side snapshot work within a
+    60-second window. That's correct for production but breaks tests
     that mutate a form between two calls to ``get_form_defaults`` and expect
     the second call to re-snapshot. Clearing the cache around every test makes
     the suite deterministic without weakening the production behaviour.
     """
-    from formdefaults.core import _LAST_SNAPSHOT
+    from formdefaults.core import clear_snapshot_cache
 
-    _LAST_SNAPSHOT.clear()
+    clear_snapshot_cache()
     yield
-    _LAST_SNAPSHOT.clear()
+    clear_snapshot_cache()
 
 
 @pytest.fixture

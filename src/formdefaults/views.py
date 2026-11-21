@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import View
 
@@ -8,11 +9,21 @@ from formdefaults.models import FormRepresentation
 from formdefaults.permissions import can_edit_system_wide_defaults
 
 
+def _get_form_repr(form_full_name):
+    """Return the FormRepresentation, or raise Http404 when it doesn't exist
+    or its form class can't be resolved any more (renamed / removed form,
+    dynamically built class) — instead of a 500 from the import."""
+    form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
+    if form_repr.get_form_class() is None:
+        raise Http404("This form is no longer available.")
+    return form_repr
+
+
 class UserFormDefaultsView(LoginRequiredMixin, View):
     template = "formdefaults/_modal_fragment.html"
 
     def get(self, request, form_full_name):
-        form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
+        form_repr = _get_form_repr(form_full_name)
         edit_form = build_user_defaults_form(form_repr, user=request.user)
         return render(
             request,
@@ -26,7 +37,7 @@ class UserFormDefaultsView(LoginRequiredMixin, View):
         )
 
     def post(self, request, form_full_name):
-        form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
+        form_repr = _get_form_repr(form_full_name)
         edit_form = build_user_defaults_form(
             form_repr, user=request.user, data=request.POST
         )
@@ -71,7 +82,7 @@ class SystemFormDefaultsView(LoginRequiredMixin, View):
             raise PermissionDenied
 
     def get(self, request, form_full_name):
-        form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
+        form_repr = _get_form_repr(form_full_name)
         self._check(request, form_repr)
         edit_form = build_user_defaults_form(form_repr, user=None)
         return render(
@@ -86,7 +97,7 @@ class SystemFormDefaultsView(LoginRequiredMixin, View):
         )
 
     def post(self, request, form_full_name):
-        form_repr = get_object_or_404(FormRepresentation, full_name=form_full_name)
+        form_repr = _get_form_repr(form_full_name)
         self._check(request, form_repr)
         edit_form = build_user_defaults_form(form_repr, user=None, data=request.POST)
         if edit_form.is_valid():
