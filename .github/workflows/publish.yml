@@ -1,0 +1,43 @@
+name: Publish to PyPI
+
+# Trusted publishing (OIDC): no API token stored anywhere. PyPI trusts this
+# workflow (owner iplweb, repo django-formdefaults, workflow publish.yml,
+# environment "pypi"). Runs on a pushed version tag, or manually for an
+# existing tag (e.g. to publish a tag pushed before this workflow existed).
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish, e.g. v0.6.4"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/django-formdefaults/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+      - name: Check that the tag matches the package version
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
+          test "v$VERSION" = "$TAG" || { echo "::error::tag $TAG != version $VERSION"; exit 1; }
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
