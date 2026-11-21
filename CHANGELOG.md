@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.4] — 2026-11-21
+
+### Fixed
+
+- Fields whose `initial` is a callable (`initial=current_year`,
+  `initial=SomeManager.default_value`, a lambda) are no longer deleted on
+  every re-snapshot. Previously the first snapshot stored such a field
+  without a value and every later one (every 60 s per process, and on
+  restart) deleted the `FormFieldRepresentation` row — cascading away all
+  saved per-user and system-wide defaults for that field, so the field
+  flickered in and out of the popup and users lost their values.
+- Callable initials are now evaluated (called without arguments, like
+  Django does at render time) and their result is stored as an
+  auto-snapshot default. It follows the callable on later snapshots (e.g.
+  a "current year" default moves on to the new year), while user-edited
+  (sticky) values stay untouched.
+- Date/datetime/time and model-instance initials are stored as ISO strings
+  and primary keys instead of being treated as unserialisable.
+- When an initial still can't be stored (the callable raises, or its
+  result isn't JSON-serialisable), a warning is logged and the field is
+  kept; only its auto-snapshot rows are dropped so the code-level initial
+  applies. User-edited values are never removed.
+
 ## [0.6.3] — 2026-08-07
 
 ### Added

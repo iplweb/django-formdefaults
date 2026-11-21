@@ -1,9 +1,10 @@
+import datetime
 import json
 import logging
 import time
 
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Model, Q
 
 from formdefaults.util import full_name
 
@@ -15,7 +16,7 @@ SNAPSHOT_TTL_SECONDS = 60.0
 
 
 def _do_update(form_instance, form_repr, user=None):
-    from formdefaults.models import FormFieldRepresentation
+    from formdefaults.models import FormFieldDefaultValue, FormFieldRepresentation
 
     form_fields = form_instance.fields
     form_fields_names = list(form_fields.keys())
@@ -28,7 +29,7 @@ def _do_update(form_instance, form_repr, user=None):
         new_klass = full_name(form_field)
         new_label = form_field.label or field_name.replace("_", " ").capitalize()
 
-        db_field, created = FormFieldRepresentation.objects.get_or_create(
+        db_field, _created = FormFieldRepresentation.objects.get_or_create(
             parent=form_repr,
             name=field_name,
             defaults={"klass": new_klass, "label": new_label, "order": no},
@@ -47,14 +48,15 @@ def _do_update(form_instance, form_repr, user=None):
         if update_fields:
             db_field.save(update_fields=update_fields)
 
-        # Try to record the form's initial as the system-wide default value.
-        # Lambda / non-JSON-serialisable initials are skipped silently.
-        form_field_value = form_field.initial
-        try:
-            json.dumps(form_field_value)
-        except TypeError:
-            if not created:
-                db_field.delete()
+        ok, form_field_value = _snapshot_value(form_repr, field_name, form_field)
+        if not ok:
+            # The code-level initial can't be mirrored into the DB. Keep the
+            # field (and every user-edited, sticky value attached to it) and
+            # only drop the auto-snapshot mirrors, so the code-level initial
+            # wins at render time instead of a stale snapshot.
+            FormFieldDefaultValue.objects.filter(
+                field=db_field, is_auto_snapshot=True
+            ).delete()
             continue
 
         _upsert_auto_value(form_repr, db_field, user=None, code_value=form_field_value)
@@ -62,6 +64,66 @@ def _do_update(form_instance, form_repr, user=None):
             _upsert_auto_value(
                 form_repr, db_field, user=user, code_value=form_field_value
             )
+
+
+def _to_json_value(value):
+    """Convert an evaluated `initial` into a JSON-storable value.
+
+    Mirrors what Django accepts back as `initial`: dates/times become ISO
+    strings, model instances become their PK. Returns the value normalised
+    through a JSON round-trip (so e.g. tuples compare equal to the stored
+    lists). Raises `TypeError` / `ValueError` when it can't be stored."""
+    if isinstance(value, datetime.date | datetime.datetime | datetime.time):
+        value = value.isoformat()
+    elif isinstance(value, Model):
+        value = value.pk
+    elif isinstance(value, list | tuple):
+        value = [
+            v.pk
+            if isinstance(v, Model)
+            else v.isoformat()
+            if isinstance(v, datetime.date | datetime.datetime | datetime.time)
+            else v
+            for v in value
+        ]
+    return json.loads(json.dumps(value))
+
+
+def _snapshot_value(form_repr, field_name, form_field):
+    """Return `(ok, value)` — the field's code-level initial ready to store.
+
+    Callable initials are evaluated the same way Django evaluates them at
+    render time (called without arguments), so a default like "current
+    year" is stored as its current result and the auto-snapshot row
+    follows it on later snapshots. `ok=False` means the value can't be
+    stored (the callable raised or the result isn't JSON-serialisable);
+    a warning is logged and the caller must leave existing rows alone."""
+    value = form_field.initial
+    if callable(value):
+        try:
+            value = value()
+        except Exception:
+            # Arbitrary user code: a failure here must not break rendering
+            # nor wipe stored defaults. Log it with the traceback.
+            logger.warning(
+                "formdefaults: calling initial of %s.%s failed; "
+                "not snapshotting its default value",
+                form_repr.full_name,
+                field_name,
+                exc_info=True,
+            )
+            return False, None
+    try:
+        return True, _to_json_value(value)
+    except (TypeError, ValueError):
+        logger.warning(
+            "formdefaults: initial of %s.%s (%r) is not JSON-serialisable; "
+            "keeping the field without an automatic default value",
+            form_repr.full_name,
+            field_name,
+            value,
+        )
+        return False, None
 
 
 def _upsert_auto_value(form_repr, db_field, *, user, code_value):
