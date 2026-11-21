@@ -53,8 +53,9 @@ override their own defaults via a popup. No code changes per form.
   the moment a user/admin edits them in the UI.
 - **JSON-storable defaults** — covers the common Django field types
   (numbers, strings, booleans, dates/datetimes/times, `ModelChoiceField`
-  PKs); non-serialisable lambdas/callables keep working at the form
-  level but aren't persisted.
+  PKs). Callable initials (`initial=current_year`, lambdas) are evaluated
+  at snapshot time and their result is stored as an auto-snapshot value
+  that follows the callable on later snapshots.
 - **Optional in-form HTML** — each form representation has
   `html_before`/`html_after` text fields available as
   `formdefaults_pre_html` / `formdefaults_post_html` in the form's
@@ -352,9 +353,11 @@ FormFieldDefaultValue
 
 - Forms identified by fully qualified Python path. Renaming or moving a Form
   class invalidates the saved defaults.
-- Only fields whose `initial` is JSON-serialisable get a stored default.
-  Lambdas / callables on `initial` keep working at the form level but aren't
-  persisted.
+- Only fields whose `initial` (after calling it, if it is a callable) is
+  JSON-serialisable get a stored default. Otherwise a warning is logged and
+  the field is kept without an automatic default — user-edited values are
+  never dropped. Callables are called without arguments (as Django does at
+  render time), so request-dependent defaults can't be captured.
 - `FormFieldDefaultValue.clean()` re-instantiates the form to validate typed
   values. Forms with heavy `__init__` cost slow down admin saves.
 - The popup is opt-in: it only works if you include `formdefaults.urls`,
