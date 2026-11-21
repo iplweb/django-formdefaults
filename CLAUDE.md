@@ -135,10 +135,11 @@ cd example_project && python manage.py makemessages -l pl --no-obsolete
 3. `make messages compilemessages` if translatable strings changed.
 4. Commit (`chore: release X.Y.Z`).
 5. `git tag -a vX.Y.Z -m "Release X.Y.Z"`.
-6. `git push origin main vX.Y.Z`.
-7. `uv build`.
-8. `uv publish` — or `uv publish dist/django_formdefaults-X.Y.Z*` when
-   older versions still linger in `dist/`.
+6. `git push origin main vX.Y.Z` — the `Publish to PyPI` workflow
+   (`.github/workflows/publish.yml`, PyPI trusted publishing via OIDC, GitHub
+   environment `pypi`) builds and uploads the tagged version. No local
+   `uv publish` / API token needed. For a tag pushed before the workflow
+   existed: `gh workflow run publish.yml -f tag=vX.Y.Z`.
 
 The `[example]` extra pins `run-site>=0.4` because `run-site` 0.5+ has
 been renamed to `django-run-site` and is not yet on PyPI — PyPI rejects
