@@ -63,7 +63,7 @@ def test_get_form_defaults_change_label_field(test_form, test_form_repr):
 
     # Force a re-snapshot — bypass the per-process freshness cache that would
     # otherwise skip the second call's DB-side reconciliation.
-    core._LAST_SNAPSHOT.clear()
+    core.clear_snapshot_cache()
     core.get_form_defaults(test_form, "123")
 
     assert test_form_repr.fields_set.first().label == "456"
@@ -79,7 +79,7 @@ def test_get_form_defaults_undumpable_json(test_form, test_form_repr):
 
     test_form.fields["fld"].initial = test_get_form_defaults_undumpable_json
     # Force a re-snapshot — bypass the per-process freshness cache.
-    core._LAST_SNAPSHOT.clear()
+    core.clear_snapshot_cache()
     core.get_form_defaults(test_form, "123")
     assert test_form_repr.values_set.count() == 0
     assert test_form_repr.fields_set.count() == 1
@@ -94,6 +94,9 @@ def test_get_form_defaults_with_user(test_form, test_form_repr, normal_django_us
 
     o = test_form_repr.values_set.first()
     o.value = 456
+    # An edit made through the UI/admin makes the value sticky; an
+    # auto-snapshot row would be refreshed from code on the next snapshot.
+    o.is_auto_snapshot = False
     o.save()
 
     res = core.get_form_defaults(test_form, user=normal_django_user)
@@ -141,7 +144,7 @@ def test_update_refreshes_auto_snapshot_value(test_form, test_form_repr):
     assert row.value == 123
 
     test_form.fields["fld"].initial = 999
-    core._LAST_SNAPSHOT.clear()
+    core.clear_snapshot_cache()
     core.update_form_db_repr(test_form, test_form_repr)
 
     row.refresh_from_db()
@@ -161,7 +164,7 @@ def test_update_does_not_touch_sticky_value(test_form, test_form_repr):
     row.save()
 
     test_form.fields["fld"].initial = 999
-    core._LAST_SNAPSHOT.clear()
+    core.clear_snapshot_cache()
     core.update_form_db_repr(test_form, test_form_repr)
 
     row.refresh_from_db()
@@ -199,7 +202,7 @@ def callable_form_repr(callable_form):
 
 
 def _resnapshot(form, form_repr):
-    core._LAST_SNAPSHOT.clear()
+    core.clear_snapshot_cache()
     core.update_form_db_repr(form, form_repr)
 
 

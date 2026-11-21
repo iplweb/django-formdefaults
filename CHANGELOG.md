@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.5] — 2026-11-21
+
+### Fixed
+
+- The per-process snapshot freshness cache no longer hides missing form
+  structure. `get_form_defaults()` now re-snapshots whenever the
+  `FormRepresentation` was just created (e.g. after an admin deleted it or
+  the table was cleared) or its `FormFieldRepresentation` rows don't match
+  the form's fields — previously the form had no defaults and the
+  "My defaults" popup was empty for up to 60 s per process.
+- The freshness marker is set only after the snapshot transaction commits
+  (`transaction.on_commit`), so a rolled-back snapshot no longer leaves the
+  form marked as fresh.
+- The popup views (`UserFormDefaultsView`, `SystemFormDefaultsView`) return
+  404 instead of a 500 (`ModuleNotFoundError` / `AttributeError`) when the
+  stored form class can't be resolved any more — a form renamed, moved or
+  removed in code, or a dynamically built class whose module can't be
+  imported.
+- `FormRepresentation.get_form_class()` returns `None` (and logs a warning)
+  for an unresolvable class, as its docstring always promised, instead of
+  raising.
+
+### Added
+
+- `formdefaults.core.clear_snapshot_cache(form_full_name=None)` — public way
+  to reset the per-process freshness cache (all forms, or one), e.g. between
+  tests. Use it instead of touching the private `core._LAST_SNAPSHOT`.
+
 ## [0.6.4] — 2026-11-21
 
 ### Fixed

@@ -1,4 +1,5 @@
 import datetime
+import functools
 import json
 import logging
 import time
@@ -10,7 +11,11 @@ from formdefaults.util import full_name
 
 logger = logging.getLogger(__name__)
 
-# Per-process freshness cache — invalidated only on process restart (deploy).
+# Per-process freshness cache: "the structure of form X was snapshotted into
+# the DB less than SNAPSHOT_TTL_SECONDS ago". Only an optimisation — it is
+# never trusted when the DB visibly disagrees (see `_needs_snapshot`), and it
+# is only set once the snapshot transaction has committed. Use
+# `clear_snapshot_cache()` to reset it (e.g. in tests).
 _LAST_SNAPSHOT: dict[str, float] = {}
 SNAPSHOT_TTL_SECONDS = 60.0
 
@@ -171,13 +176,41 @@ def _mark_snapshot_fresh(form_full_name: str) -> None:
     _LAST_SNAPSHOT[form_full_name] = time.monotonic()
 
 
+def clear_snapshot_cache(form_full_name: str | None = None) -> None:
+    """Forget that forms were recently snapshotted (in this process).
+
+    With no argument the whole per-process cache is cleared; with a dotted
+    form name (as returned by `formdefaults.util.full_name`) only that form
+    is forgotten. The next `get_form_defaults()` call for an affected form
+    re-snapshots its structure. Mainly useful in test suites that create and
+    roll back form representations between tests."""
+    if form_full_name is None:
+        _LAST_SNAPSHOT.clear()
+    else:
+        _LAST_SNAPSHOT.pop(form_full_name, None)
+
+
+def _needs_snapshot(form_instance, form_repr, created: bool) -> bool:
+    """Decide whether the DB structure of the form must be (re)snapshotted.
+
+    The freshness cache alone is not enough: the representation may have
+    been deleted (by an admin, a cleared table, a rolled-back transaction)
+    and recreated by the `get_or_create` above, or its field rows may be
+    gone. In those cases snapshot regardless of the cache."""
+    if created:
+        return True
+    if not _snapshot_is_fresh(form_repr.full_name):
+        return True
+    return form_repr.fields_set.count() != len(form_instance.fields)
+
+
 @transaction.atomic
 def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True):
     fn = full_name(form_instance)
 
     from formdefaults.models import FormRepresentation
 
-    form_repr, _ = FormRepresentation.objects.get_or_create(
+    form_repr, created = FormRepresentation.objects.get_or_create(
         full_name=fn,
         defaults={"label": label or fn},
     )
@@ -186,9 +219,12 @@ def get_form_defaults(form_instance, label=None, user=None, update_db_repr=True)
         if label is not None and form_repr.label != label:
             form_repr.label = label
             form_repr.save(update_fields=["label"])
-        if not _snapshot_is_fresh(fn):
+        if _needs_snapshot(form_instance, form_repr, created):
             update_form_db_repr(form_instance, form_repr, user=None)
-            _mark_snapshot_fresh(fn)
+            # Only mark the form fresh once the snapshot is really in the
+            # DB: if the surrounding transaction rolls back, the callback is
+            # discarded and the next call snapshots again.
+            transaction.on_commit(functools.partial(_mark_snapshot_fresh, fn))
 
     values = {
         qs["field__name"]: qs["value"]
